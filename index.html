@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>全域通缉令 - 炸着喝</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+html, body {
+    background: #121218;
+    font-family: "SimHei", "PingFang SC", "Microsoft YaHei", sans-serif;
+    /* 关键：允许滚动，由内容决定高度 */
+    overflow-x: hidden;
+    overflow-y: auto;
+    width: 100%;
+    /* 用 min-height 而不是 height，让小屏能撑开滚动 */
+    min-height: 100vh;
+}
+/* 弹幕层：fixed 铺满视口，独立于文档流，不影响页面滚动 */
+.danmu-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 999;
+    /* 关键：弹幕层不抢滚动，不影响布局 */
+}
+/* 弹幕元素 */
+.danmu {
+    position: absolute;
+    white-space: nowrap;
+    color: #fff;
+    font-size: 16px;
+    text-shadow: 1px 1px 2px #000;
+    will-change: transform;
+    /* 硬件加速 */
+    transform: translate3d(0,0,0);
+}
+/* 内容容器：正常文档流，小屏自然撑开滚动 */
+.content {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 16px 30px;
+}
+/* 通缉卡片 */
+.wanted-box {
+    width: 100%;
+    max-width: 620px;
+    background: #fff;
+    border: 8px solid #111;
+    padding: 32px;
+    margin-bottom: 30px;
+}
+.top-title {
+    text-align: center;
+    font-size: 48px;
+    font-weight: 900;
+    color: #c41e3a;
+    letter-spacing: 6px;
+    border-bottom: 3px solid #222;
+    padding-bottom: 16px;
+    margin-bottom: 22px;
+}
+.info-row {
+    display: flex;
+    margin: 15px 0;
+    font-size: 18px;
+    line-height: 1.7;
+}
+.label {
+    width: 145px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+.desc-block {
+    margin: 28px 0;
+    padding: 22px;
+    background: #f8f8f8;
+    border-left: 5px solid #c41e3a;
+    font-size: 17px;
+    line-height: 1.8;
+}
+.reward {
+    text-align: center;
+    font-size: 28px;
+    color: #c41e3a;
+    font-weight: bold;
+    margin: 32px 0 12px;
+}
+.footer-text {
+    text-align: right;
+    margin-top: 38px;
+    font-size: 15px;
+    color: #444;
+}
+/* 底部声明 */
+.declare {
+    text-align: center;
+    font-size: 13px;
+    color: #888;
+    padding: 10px 16px 25px;
+    letter-spacing: 1px;
+}
+
+/* 手机适配 */
+@media (max-width: 640px) {
+    .content { padding: 20px 10px; }
+    .wanted-box { padding: 20px; border-width: 5px; }
+    .top-title { font-size: 36px; letter-spacing: 3px; }
+    .info-row { font-size: 16px; flex-direction: column; }
+    .label { width: auto; margin-bottom: 4px; }
+    .desc-block { font-size: 15px; padding: 16px; }
+    .reward { font-size: 22px; }
+    .danmu { font-size: 14px; }
+}
+</style>
+</head>
+<body>
+<!-- 弹幕层：fixed 铺满视口，不影响页面布局 -->
+<div class="danmu-layer" id="danmuLayer"></div>
+
+<!-- 内容层：正常文档流，小屏可滚动 -->
+<div class="content">
+    <div class="wanted-box">
+        <div class="top-title">全域通缉</div>
+
+        <div class="info-row">
+            <div class="label">通缉对象：</div>
+            <div class="text">炸着喝</div>
+        </div>
+        <div class="info-row">
+            <div class="label">危险等级：</div>
+            <div class="text">宇宙最高 · 湮灭级</div>
+        </div>
+        <div class="info-row">
+            <div class="label">专属能力：</div>
+            <div class="text">超凡枪法、毁星级顶尖车技</div>
+        </div>
+
+        <div class="desc-block">
+            案情说明：嫌疑人炸着喝驾车疾驰途中随意开枪，枪法破坏力突破天体承受上限，高速行驶带来的空间震荡叠加枪击威力，接连击碎太阳系全部行星，撕裂银河系整片星云，造成无数星系崩塌毁灭。并无主动毁灭宇宙的意图，但自身能力超出上限，事后向深空逃窜，至今下落不明。
+        </div>
+
+        <div class="info-row">
+            <div class="label">抓捕指令：</div>
+            <div class="text">禁止交战，仅允许远距离劝降，切勿引诱对方开枪、开车</div>
+        </div>
+        <div class="info-row">
+            <div class="label">出没范围：</div>
+            <div class="text">全宇宙任意星域，行踪无迹可寻</div>
+        </div>
+
+        <div class="reward">悬赏：无限星际资源 + 高阶宇宙管理权限</div>
+        <div class="footer-text">银河联邦安全总局 · 宇宙纪元无时限</div>
+    </div>
+
+    <div class="declare">本页面仅供娱乐，所有内容均为虚构，无任何现实指向</div>
+</div>
+
+<script>
+const danmuList = [
+    "星际观测员：刚才银河系碎片还在往外飘！",
+    "外星路人：就开车开枪而已怎么宇宙没了啊",
+    "巡逻舰队：千万别让他摸到跑车和枪械",
+    "吃瓜星球居民：这人的枪法到底是什么规格",
+    "深空侦查官：已经找不到完整太阳系了",
+    "星云住民：建议全星系禁止售卖跑车",
+    "执法队员：当初谁放他上路的啊",
+    "宇宙学者：车技带来的空间波动太恐怖了",
+    "路过飞船驾驶员：还好我提前跃迁跑路了",
+    "星系管理员：我的星域绩效直接清零了",
+    "机械生命：测算他一枪能击穿三十颗恒星",
+    "流浪旅人：现在深空到处都是星球残骸",
+    "前线卫兵：上级下令见到直接绕道走",
+    "科研组：已经无法复原破碎的银河系",
+    "围观外星人：这通缉等级是天花板级别了",
+    "星际主播：现场残骸画面太震撼了",
+    "安全部门：禁止任何赛车赛事对外开放",
+    "古老文明使者：从未见过这种破坏力",
+    "星际快递员：航线全部被迫重新规划",
+    "星防总部：抓到优先安抚不要激怒"
+];
+
+const layer = document.getElementById('danmuLayer');
+const MAX_DANMU = 18; // 并发上限，防止DOM堆积
+
+// 所有弹幕共享一个位置数组（按轨道）
+const TRACK_COUNT = 8;
+const trackPositions = new Array(TRACK_COUNT).fill(null);
+
+function createDanmu() {
+    // 限制并发数
+    if (layer.children.length >= MAX_DANMU) return;
+
+    const text = danmuList[Math.floor(Math.random() * danmuList.length)];
+    const div = document.createElement('div');
+    div.className = 'danmu';
+    div.textContent = text;
+
+    // 随机选一条轨道
+    const track = Math.floor(Math.random() * TRACK_COUNT);
+    // 用 viewport 单位，兼容各种屏幕
+    const viewH = window.innerHeight;
+    const topPos = (track / TRACK_COUNT) * (viewH * 0.85) + 10;
+
+    div.style.top = topPos + 'px';
+    div.style.left = '0px';
+    div.style.transform = `translate3d(${window.innerWidth}px, 0, 0)`;
+
+    const colorArr = ['#fff','#ffdd55','#55eeff','#ff77aa','#88ff88'];
+    div.style.color = colorArr[Math.floor(Math.random() * colorArr.length)];
+
+    layer.appendChild(div);
+
+    // 每条弹幕独立速度（慢速，1~3px/帧）
+    const speed = 1 + Math.random() * 2;
+    let x = window.innerWidth;
+
+    // 用 WeakMap 存每条弹幕的状态，避免闭包堆积
+    div._speed = speed;
+    div._active = true;
+}
+
+// 全局唯一 RAF，驱动所有弹幕
+let lastTime = performance.now();
+function globalTick(now) {
+    const dt = (now - lastTime) / 16.67; // 归一化到 60fps
+    lastTime = now;
+
+    const children = layer.children;
+    const viewW = window.innerWidth;
+
+    for (let i = children.length - 1; i >= 0; i--) {
+        const el = children[i];
+        if (!el._active) continue;
+
+        // 从 transform 里读当前 x（避免触发回流）
+        const match = el.style.transform.match(/translate3d\(([-\d.]+)px/);
+        let x = match ? parseFloat(match[1]) : 0;
+        x -= el._speed * dt;
+
+        if (x < -el.offsetWidth) {
+            // 完全飞出，移除
+            el._active = false;
+            el.remove();
+        } else {
+            el.style.transform = `translate3d(${x}px, 0, 0)`;
+        }
+    }
+    requestAnimationFrame(globalTick);
+}
+
+// 启动
+requestAnimationFrame(globalTick);
+setInterval(createDanmu, 500);
+
+// 窗口尺寸变化时重新校准（防止旋转屏幕后弹幕错位）
+window.addEventListener('resize', () => {
+    // 清除所有弹幕，让它自然重建
+    while (layer.firstChild) layer.removeChild(layer.firstChild);
+});
+</script>
+</body>
+</html>
