@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>网络时光机 - Web Archive</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+    background: #f4f4f0;
+    color: #333;
+    min-height: 100vh;
+  }
+
+  /* 头部 */
+  .wb-header {
+    background: #2c2c2c;
+    color: #fff;
+    padding: 18px 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .wb-header .logo {
+    font-size: 28px;
+  }
+  .wb-header h1 {
+    font-size: 22px;
+    font-weight: 600;
+  }
+  .wb-header small {
+    display: block;
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 2px;
+  }
+  .wb-nav {
+    margin-left: auto;
+    display: flex;
+    gap: 20px;
+  }
+  .wb-nav a {
+    color: #ccc;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  .wb-nav a:hover { color: #fff; }
+
+  /* 搜索区域 */
+  .wb-search {
+    max-width: 800px;
+    margin: 80px auto 40px;
+    padding: 0 20px;
+    text-align: center;
+  }
+  .wb-search h2 {
+    font-size: 20px;
+    margin-bottom: 8px;
+    color: #444;
+  }
+  .wb-search p {
+    color: #888;
+    font-size: 14px;
+    margin-bottom: 30px;
+  }
+  .search-bar {
+    display: flex;
+    gap: 10px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .search-bar input {
+    flex: 1;
+    padding: 12px 16px;
+    font-size: 15px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+  }
+  .search-bar input:focus { border-color: #4a7c9b; }
+  .search-bar button {
+    padding: 12px 24px;
+    font-size: 15px;
+    background: #4a7c9b;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .search-bar button:hover { background: #3a6a8a; }
+
+  /* 加载动画 */
+  .wb-loading {
+    text-align: center;
+    padding: 40px 20px;
+    display: none;
+  }
+  .wb-loading .spinner {
+    font-size: 48px;
+    animation: spin 2s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .wb-loading p { color: #666; margin-top: 16px; font-size: 15px; }
+  .progress-bar {
+    width: 300px;
+    height: 6px;
+    background: #ddd;
+    border-radius: 3px;
+    margin: 16px auto 0;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: #4a7c9b;
+    border-radius: 3px;
+    transition: width 0.3s;
+  }
+
+  /* 结果区域 */
+  .wb-results {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    display: none;
+  }
+  .wb-results h3 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #333;
+    border-bottom: 2px solid #4a7c9b;
+    padding-bottom: 8px;
+  }
+
+  /* 快照卡片 */
+  .snapshot-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+  .snapshot-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+  .snap-header {
+    background: #f0f0ea;
+    padding: 12px 18px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    font-size: 14px;
+    color: #555;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  .snap-header .date { font-weight: 600; color: #333; }
+  .snap-header .status {
+    margin-left: auto;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .status-ok { background: #d4edda; color: #155724; }
+  .status-last { background: #fff3cd; color: #856404; }
+  .snap-body {
+    padding: 16px 18px;
+  }
+  .snap-body p {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 4px;
+    line-height: 1.6;
+  }
+  .snap-body .note {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #f8f8f4;
+    border-left: 3px solid #4a7c9b;
+    font-size: 13px;
+    color: #666;
+  }
+  .snap-body .note-warning {
+    border-left-color: #e0a800;
+    background: #fffbe6;
+  }
+  .snap-actions {
+    padding: 12px 18px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 10px;
+  }
+  .snap-actions a {
+    display: inline-block;
+    padding: 8px 18px;
+    background: #4a7c9b;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  .snap-actions a:hover { background: #3a6a8a; }
+  .snap-actions a.btn-warning { background: #e0a800; }
+  .snap-actions a.btn-warning:hover { background: #c69500; }
+
+  /* 底部 */
+  .wb-footer {
+    text-align: center;
+    padding: 30px 20px;
+    color: #999;
+    font-size: 13px;
+    border-top: 1px solid #e0e0e0;
+    margin-top: 60px;
+  }
+  .wb-footer a { color: #4a7c9b; text-decoration: none; }
+  .wb-footer .disclaimer { margin-top: 8px; font-size: 12px; color: #bbb; }
+
+  /* 返回链接 */
+  .back-link {
+    display: inline-block;
+    margin-top: 20px;
+    color: #4a7c9b;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  .back-link:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<!-- 头部 -->
+<header class="wb-header">
+  <div class="logo">⏳</div>
+  <div>
+    <h1>网络时光机</h1>
+    <small>Web Archive · 保存互联网的记忆</small>
+  </div>
+  <nav class="wb-nav">
+    <a href="#">首页</a>
+    <a href="#">浏览存档</a>
+    <a href="#">高级搜索</a>
+    <a href="#">关于</a>
+  </nav>
+</header>
+
+<!-- 搜索区域 -->
+<div class="wb-search">
+  <h2>🔍 探索互联网的过去</h2>
+  <p>输入一个网址，查看它在历史上的存档版本</p>
+  <div class="search-bar">
+    <input type="text" id="wb-input" placeholder="输入网址，如：www.example.com" value="www.obsidian-archive.net">
+    <button onclick="doSearch()">🕰️ 浏览历史</button>
+  </div>
+</div>
+
+<!-- 加载动画 -->
+<div class="wb-loading" id="wb-loading">
+  <div class="spinner">⏳</div>
+  <p id="loading-text">正在检索存档数据库...</p>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+</div>
+
+<!-- 搜索结果 -->
+<div class="wb-results" id="wb-results">
+
+  <h3>🌐 查询结果：www.obsidian-archive.net</h3>
+  <p style="font-size:14px;color:#666;margin-bottom:20px;">该网站在 2014–2016 年间共有 <strong>3 个可用快照</strong>。网站目前已离线。</p>
+
+  <!-- 快照1 -->
+  <div class="snapshot-card">
+    <div class="snap-header">
+      <span class="date">📅 2014年6月15日</span>
+      <span>⏰ 14:32:05</span>
+      <span class="status status-ok">● 正常抓取</span>
+    </div>
+    <div class="snap-body">
+      <p><strong>URL：</strong> http://www.obsidian-archive.net/</p>
+      <p><strong>页面类型：</strong> text/html · <strong>大小：</strong> 23.4 KB</p>
+      <p class="note">📝 该网站最早的存档记录。看起来是一个刚上线不久的学术资源站，内容还比较简陋。</p>
+    </div>
+    <div class="snap-actions">
+      <a href="archive/2014_06_15/index.html">🔗 查看此快照</a>
+    </div>
+  </div>
+
+  <!-- 快照2 -->
+  <div class="snapshot-card">
+    <div class="snap-header">
+      <span class="date">📅 2015年9月3日</span>
+      <span>⏰ 09:17:42</span>
+      <span class="status status-ok">● 正常抓取</span>
+    </div>
+    <div class="snap-body">
+      <p><strong>URL：</strong> http://www.obsidian-archive.net/</p>
+      <p><strong>页面类型：</strong> text/html · <strong>大小：</strong> 45.8 KB</p>
+      <p class="note">📝 网站经过大规模更新，新增了「访客留言板」和「目录索引」页面，内容明显丰富了很多。</p>
+    </div>
+    <div class="snap-actions">
+      <a href="archive/2015_09_03/index.html">🔗 查看此快照</a>
+    </div>
+  </div>
+
+  <!-- 快照3 -->
+  <div class="snapshot-card">
+    <div class="snap-header">
+      <span class="date">📅 2016年2月28日</span>
+      <span>⏰ 23:59:01</span>
+      <span class="status status-last">● 最后一次抓取</span>
+    </div>
+    <div class="snap-body">
+      <p><strong>URL：</strong> http://www.obsidian-archive.net/</p>
+      <p><strong>页面类型：</strong> text/html · <strong>大小：</strong> 67.2 KB</p>
+      <p class="note note-warning">📝 ⚠️ 这是最后一次存档。主页已变成「关站通知」页面，但内容非常不正经……背景全是表情包。网站在此之后彻底离线。</p>
+    </div>
+    <div class="snap-actions">
+      <a href="archive/2016_02_28/index.html" class="btn-warning">🔗 查看此快照（最终版）</a>
+    </div>
+  </div>
+
+  <a href="index.html" class="back-link">← 返回深夜茶馆论坛</a>
+
+</div>
+
+<!-- 底部 -->
+<footer class="wb-footer">
+  <p>网络时光机 · 非营利性数字图书馆项目 | 已保存 7450亿+ 网页</p>
+  <p><a href="#">使用条款</a> | <a href="#">隐私政策</a> | <a href="#">API</a></p>
+  <p class="disclaimer">本页面为 ARG 游戏「暗网回忆录」中的虚构页面，不代表任何真实服务</p>
+</footer>
+
+<script>
+function doSearch() {
+  var loading = document.getElementById('wb-loading');
+  var results = document.getElementById('wb-results');
+  var fill = document.getElementById('progress-fill');
+  var text = document.getElementById('loading-text');
+
+  // 隐藏结果，显示加载
+  results.style.display = 'none';
+  loading.style.display = 'block';
+  fill.style.width = '0%';
+
+  // 进度条动画
+  var progress = 0;
+  var messages = [
+    '正在检索存档数据库...',
+    '正在遍历互联网档案馆索引...',
+    '正在匹配 URL 快照记录...',
+    '正在验证快照完整性...',
+    '检索完成！'
+  ];
+  var msgIndex = 0;
+  text.textContent = messages[0];
+
+  var interval = setInterval(function() {
+    progress += Math.random() * 25 + 10;
+    if (progress >= 100) progress = 100;
+    fill.style.width = progress + '%';
+
+    if (progress > 20 && msgIndex < 1) { msgIndex = 1; text.textContent = messages[1]; }
+    if (progress > 40 && msgIndex < 2) { msgIndex = 2; text.textContent = messages[2]; }
+    if (progress > 65 && msgIndex < 3) { msgIndex = 3; text.textContent = messages[3]; }
+    if (progress >= 100) {
+      clearInterval(interval);
+      text.textContent = messages[4];
+      // 延迟一下再显示结果
+      setTimeout(function() {
+        loading.style.display = 'none';
+        results.style.display = 'block';
+        // 滚动到结果区域
+        results.scrollIntoView({ behavior: 'smooth' });
+      }, 500);
+    }
+  }, 300);
+}
+</script>
+
+</body>
+</html>
