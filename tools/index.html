@@ -1,1 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tools | 星空岛</title>
+<style>
+:root {
+  --bg:#0d0a1a;--purple:#a78bfa;--purple-light:#c4b5fd;--pink:#ec4899;
+  --cyan:#22d3ee;--green:#34d399;--orange:#fb923c;--yellow:#facc15;
+  --text:#e8e0ff;--text-dim:#9ca3af;
+  --card:rgba(30,25,60,0.7);--card-border:rgba(167,139,250,0.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.6;cursor:none;perspective:1000px;}
 
+/* 鼠标 */
+#cursor-glow{position:fixed;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(167,139,250,0.15) 0%,transparent 70%);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
+#cursor-dot{position:fixed;width:6px;height:6px;border-radius:50%;background:var(--purple);pointer-events:none;z-index:10000;transform:translate(-50%,-50%);box-shadow:0 0 8px var(--purple);}
+
+/* 导航 */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:16px 40px;background:rgba(13,10,26,0.85);backdrop-filter:blur(12px);border-bottom:1px solid rgba(167,139,250,0.15);}
+nav .logo{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px;}
+nav ul{display:flex;list-style:none;gap:8px;}
+nav ul li a{display:block;padding:8px 18px;color:var(--text-dim);text-decoration:none;border-radius:8px;font-size:0.95rem;transition:all 0.3s;}
+nav ul li a:hover{color:var(--purple-light);background:rgba(167,139,250,0.1);}
+nav ul li a.active{color:#fff;background:linear-gradient(135deg,#6d28d9,var(--pink));box-shadow:0 4px 15px rgba(167,139,250,0.4);}
+
+main{padding:100px 20px 40px;max-width:1100px;margin:0 auto;}
+
+.page-header{text-align:center;margin-bottom:30px;}
+.page-header h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:900;background:linear-gradient(135deg,var(--purple-light),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.page-header p{color:var(--text-dim);margin-top:10px;}
+
+/* ===== 工具页面独有：搜索框展开动画 ===== */
+.tool-bar{display:flex;gap:12px;margin-bottom:30px;flex-wrap:wrap;align-items:center;justify-content:center;}
+.tool-bar input{
+  flex:1;min-width:200px;max-width:400px;padding:0 18px;height:0;
+  border-radius:10px;border:2px solid var(--card-border);background:var(--card);
+  color:var(--text);font-size:0.92rem;outline:none;backdrop-filter:blur(10px);
+  opacity:0;animation:search-expand 0.6s 0.3s forwards;
+}
+@keyframes search-expand{to{padding:14px 18px;height:46px;opacity:1;}}
+.tool-bar input:focus{border-color:var(--purple);box-shadow:0 0 15px rgba(167,139,250,0.3);}
+
+/* 分类按钮 - 波浪动画 */
+.cat-btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;}
+.cat-btns button{
+  padding:0 14px;height:0;font-size:0;cursor:none;
+  background:rgba(167,139,250,0.1);border:1px solid var(--card-border);
+  color:var(--purple-light);border-radius:20px;transition:all 0.3s;
+  opacity:0;
+}
+.cat-btns button:nth-child(1){animation:cat-pop 0.4s 0.5s forwards;}
+.cat-btns button:nth-child(2){animation:cat-pop 0.4s 0.6s forwards;}
+.cat-btns button:nth-child(3){animation:cat-pop 0.4s 0.7s forwards;}
+.cat-btns button:nth-child(4){animation:cat-pop 0.4s 0.8s forwards;}
+.cat-btns button:nth-child(5){animation:cat-pop 0.4s 0.9s forwards;}
+.cat-btns button:nth-child(6){animation:cat-pop 0.4s 1.0s forwards;}
+@keyframes cat-pop{to{padding:8px 14px;height:34px;font-size:0.82rem;opacity:1;}}
+.cat-btns button:hover,.cat-btns button.active{background:var(--purple);color:#fff;border-color:var(--purple);transform:translateY(-2px);box-shadow:0 4px 12px rgba(167,139,250,0.4);}
+
+/* ===== 工具卡片 - 3D 翻转动画 ===== */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
+.tool-card{
+  background:var(--card);border:1px solid var(--card-border);border-radius:14px;
+  padding:0;backdrop-filter:blur(10px);cursor:none;
+  position:relative;overflow:hidden;
+  height:200px;transform-style:preserve-3d;transition:transform 0.6s;
+  opacity:0;transform:translateY(40px) rotateX(-10deg);
+}
+.tool-card.revealed{opacity:1;transform:translateY(0) rotateX(0);}
+.tool-card:hover{transform:translateY(-5px) rotateX(5deg);box-shadow:0 12px 40px rgba(167,139,250,0.25);border-color:var(--purple);}
+.tool-card .tc-inner{padding:24px;height:100%;display:flex;flex-direction:column;}
+.tool-card .tc-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.tool-card .tc-icon{font-size:2rem;transition:transform 0.4s;}
+.tool-card:hover .tc-icon{transform:scale(1.2) rotate(8deg);}
+.tool-card .tc-name{font-size:1.1rem;font-weight:700;}
+.tool-card .tc-cat{font-size:0.72rem;padding:2px 8px;border-radius:10px;margin-left:auto;background:rgba(167,139,250,0.15);color:var(--purple-light);}
+.tool-card .tc-desc{font-size:0.85rem;color:var(--text-dim);margin-bottom:10px;line-height:1.5;flex:1;}
+.tool-card .tc-meta{display:flex;gap:8px;font-size:0.72rem;color:var(--text-dim);margin-bottom:12px;flex-wrap:wrap;}
+.tool-card .tc-meta span{background:rgba(255,255,255,0.05);padding:2px 8px;border-radius:4px;}
+.tool-card .tc-actions{display:flex;gap:8px;}
+.tool-card .tc-btn{
+  padding:8px 16px;border-radius:8px;font-size:0.82rem;cursor:none;
+  text-decoration:none;transition:all 0.3s;border:none;
+}
+.tool-card .tc-btn.primary{background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;}
+.tool-card .tc-btn.primary:hover{transform:scale(1.05);box-shadow:0 4px 15px rgba(167,139,250,0.4);}
+.tool-card .tc-btn.secondary{background:rgba(167,139,250,0.1);color:var(--purple-light);border:1px solid var(--card-border);}
+.tool-card .tc-btn.secondary:hover{background:rgba(167,139,250,0.25);}
+
+/* 卡片底部流光 */
+.tool-card::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--purple),var(--pink),transparent);
+  transform:scaleX(0);transition:transform 0.5s;
+}
+.tool-card:hover::after{transform:scaleX(1);}
+
+/* 无结果 */
+.no-result{text-align:center;padding:40px;color:var(--text-dim);font-size:1rem;display:none;}
+.no-result.show{display:block;animation:fadeIn 0.3s;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+/* 弹窗 */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;
+  display:none;align-items:center;justify-content:center;padding:20px;
+  backdrop-filter:blur(4px);
+}
+.modal-overlay.show{display:flex;animation:fadeIn 0.3s;}
+.modal{
+  background:var(--bg);border:1px solid var(--purple);border-radius:16px;
+  padding:32px;max-width:500px;width:100%;position:relative;
+  animation:modalIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes modalIn{from{transform:scale(0.7) rotateY(20deg);opacity:0;}to{transform:scale(1) rotateY(0);opacity:1;}}
+.modal .close{position:absolute;top:14px;right:18px;font-size:1.4rem;cursor:none;color:var(--text-dim);background:none;border:none;}
+.modal .close:hover{color:var(--pink);}
+.modal h3{font-size:1.3rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.modal p{color:var(--text-dim);font-size:0.92rem;line-height:1.7;margin-bottom:10px;}
+.modal .m-link{
+  display:inline-block;margin-top:14px;padding:10px 24px;border-radius:8px;
+  background:linear-gradient(135deg,var(--purple),var(--pink));color:#fff;
+  text-decoration:none;font-size:0.9rem;transition:all 0.3s;
+}
+.modal .m-link:hover{transform:scale(1.05);box-shadow:0 4px 15px rgba(167,139,250,0.4);}
+.modal .m-info{margin-top:14px;padding:12px;background:rgba(167,139,250,0.08);border-radius:8px;font-size:0.82rem;color:var(--text-dim);}
+
+/* 统计栏 */
+.stats-bar{display:flex;gap:20px;justify-content:center;margin-bottom:24px;flex-wrap:wrap;}
+.stats-bar .sb-item{font-size:0.85rem;color:var(--text-dim);background:var(--card);padding:6px 14px;border-radius:20px;border:1px solid var(--card-border);}
+.stats-bar .sb-item .num{color:var(--purple-light);font-weight:700;}
+
+footer{text-align:center;padding:30px 20px;color:var(--text-dim);font-size:0.85rem;}
+
+@media(max-width:768px){
+  nav{padding:12px 16px;}nav ul li a{padding:6px 10px;font-size:0.85rem;}
+  body{cursor:auto;}#cursor-glow,#cursor-dot{display:none;}
+}
+</style>
+</head>
+<body>
+<div id="cursor-glow"></div><div id="cursor-dot"></div>
+
+<nav>
+  <div class="logo">StarryIsland | 星空岛</div>
+  <ul>
+    <li><a href="../">首页</a></li>
+    <li><a href="../works/">作品</a></li>
+    <li><a href="../about/">关于我</a></li>
+    <li><a href="../contact/">联系我</a></li>
+    <li><a href="../about-site/">关于本站</a></li>
+    <li><a href="./" class="active">推荐工具</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="page-header">
+    <h1>🛠️ 推荐工具</h1>
+    <p>站长在用或推荐的正版免费 Windows 软件</p>
+  </div>
+
+  <div class="stats-bar">
+    <div class="sb-item">共 <span class="num" id="totalCount">10</span> 款工具</div>
+    <div class="sb-item">当前显示 <span class="num" id="showCount">10</span> 款</div>
+    <div class="sb-item">分类 <span class="num" id="catCount">6</span> 种</div>
+  </div>
+
+  <div class="tool-bar">
+    <input id="tool-search" placeholder="🔍 搜索工具名称或功能…" oninput="filterTools()">
+    <div class="cat-btns" id="cat-btns">
+      <button class="active" onclick="setCat('all',this)">全部</button>
+      <button onclick="setCat('system',this)">系统</button>
+      <button onclick="setCat('file',this)">文件</button>
+      <button onclick="setCat('media',this)">多媒体</button>
+      <button onclick="setCat('office',this)">办公</button>
+      <button onclick="setCat('network',this)">网络</button>
+    </div>
+  </div>
+
+  <div class="tools-grid" id="tools-grid"></div>
+  <div class="no-result" id="noResult">🔍 没有找到匹配的工具，换个关键词试试？</div>
+</main>
+
+<!-- 弹窗 -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="close" onclick="closeModal()">×</button>
+    <h3 id="m-title"></h3>
+    <p id="m-desc"></p>
+    <div class="m-info" id="m-info"></div>
+    <a id="m-link" href="#" target="_blank" rel="noopener" class="m-link">访问官网 →</a>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 星空岛 ✦ 本站由 AI 辅助搭建 | 工具均为正版免费软件</p>
+</footer>
+
+<script>
+// ===== 工具数据（内联） =====
+const TOOLS = [
+  {name:'Geek Uninstaller',icon:'🧹',cat:'system',catLabel:'系统',desc:'彻底卸载软件并清理残留注册表项，比系统自带的卸载干净得多。免费版已够用。',url:'https://geekuninstaller.com/',info:'大小：约 6MB | 免费版可用 | 绿色免安装',star:true},
+  {name:'Everything',icon:'🔎',cat:'file',catLabel:'文件',desc:'秒搜全盘文件，输入关键词瞬间出结果。比 Windows 搜索快一万倍。',url:'https://www.voidtools.com/',info:'大小：约 2MB | 免费 | 支持正则',star:true},
+  {name:'7-Zip',icon:'📦',cat:'file',catLabel:'文件',desc:'开源免费压缩/解压工具，支持 7z/zip/rar/iso 等几乎所有格式。右键直接用。',url:'https://www.7-zip.org/',info:'大小：约 2MB | 开源免费 | 无广告',star:true},
+  {name:'Notepad++',icon:'📝',cat:'office',catLabel:'办公',desc:'高级文本编辑器，支持语法高亮、正则替换、多标签。写代码/改配置文件必备。',url:'https://notepad-plus-plus.org/',info:'大小：约 8MB | 免费 | 插件丰富',star:false},
+  {name:'OBS Studio',icon:'🎥',cat:'media',catLabel:'多媒体',desc:'免费录屏和直播软件，支持多场景切换、桌面音频采集。做视频教程首选。',url:'https://obsproject.com/',info:'大小：约 100MB | 免费开源 | 功能强大',star:true},
+  {name:'VLC Media Player',icon:'🎬',cat:'media',catLabel:'多媒体',desc:'万能播放器，什么格式都能播。不用装一堆解码器，一个 VLC 全搞定。',url:'https://www.videolan.org/vlc/',info:'大小：约 40MB | 免费开源 | 全格式支持',star:true},
+  {name:'Rufus',icon:'💿',cat:'system',catLabel:'系统',desc:'做启动 U 盘的神器，支持 Windows/Linux ISO 写入。做系统安装盘最快的工具。',url:'https://rufus.ie/',info:'大小：约 1MB | 免费 | 绿色单文件',star:true},
+  {name:'ShareX',icon:'✂️',cat:'media',catLabel:'多媒体',desc:'截图 + 录屏 + 自动上传 + OCR 识别。截图后自动复制到剪贴板，效率神器。',url:'https://getsharex.com/',info:'大小：约 10MB | 免费开源 | 功能超多',star:false},
+  {name:'EarTrumpet',icon:'🔊',cat:'system',catLabel:'系统',desc:'Windows 音量分控工具，每个应用单独调音量。再也不用全局静音了。',url:'https://eartrumpet.app/',info:'大小：约 5MB | 微软商店免费 | UWP 应用',star:false},
+  {name:'WizTree',icon:'🌳',cat:'file',catLabel:'文件',desc:'磁盘空间分析工具，秒扫硬盘找出哪些文件夹最占空间。比 WinDirStat 快得多。',url:'https://www.diskanalyzer.com/',info:'大小：约 4MB | 免费版可用 | 极速扫描',star:false},
+];
+
+// ===== 渲染工具卡片 =====
+const grid = document.getElementById('tools-grid');
+function renderTools(list) {
+  grid.innerHTML = list.map((t,i)=>`
+    <div class="tool-card" style="transition-delay:${i*60}ms">
+      <div class="tc-inner">
+        <div class="tc-header">
+          <span class="tc-icon">${t.icon}</span>
+          <span class="tc-name">${t.name}</span>
+          ${t.star?'<span style="font-size:0.7rem;color:var(--yellow);margin-left:4px;">★ 站长推荐</span>':''}
+          <span class="tc-cat">${t.catLabel}</span>
+        </div>
+        <div class="tc-desc">${t.desc}</div>
+        <div class="tc-meta">
+          <span>正版免费</span>
+          <span>${t.catLabel}</span>
+        </div>
+        <div class="tc-actions">
+          <a href="${t.url}" target="_blank" rel="noopener" class="tc-btn primary">官网下载</a>
+          <button class="tc-btn secondary" onclick="event.preventDefault();event.stopPropagation();showModal('${t.name}','${t.desc.replace(/'/g,"\\'")}','${t.info.replace(/'/g,"\\'")}','${t.url}')">详情</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  // 入场动画由 IntersectionObserver 接管（可重复播放）
+  document.getElementById('showCount').textContent = list.length;
+  document.getElementById('noResult').classList.toggle('show', list.length===0);
+}
+renderTools(TOOLS);
+
+// ===== 搜索 + 分类 =====
+let curCat = 'all';
+function filterTools() {
+  const q = document.getElementById('tool-search').value.trim().toLowerCase();
+  let list = TOOLS;
+  if (curCat !== 'all') list = list.filter(t=>t.cat===curCat);
+  if (q) list = list.filter(t=>t.name.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q));
+  renderTools(list);
+}
+function setCat(cat,btn) {
+  curCat = cat;
+  document.querySelectorAll('.cat-btns button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  filterTools();
+}
+
+// ===== 弹窗 =====
+function showModal(title,desc,info,url) {
+  document.getElementById('m-title').textContent = title;
+  document.getElementById('m-desc').textContent = desc;
+  document.getElementById('m-info').textContent = info;
+  document.getElementById('m-link').href = url;
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('show');
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+// ===== 鼠标光晕 =====
+const glow=document.getElementById('cursor-glow'),dot=document.getElementById('cursor-dot');
+let mx=innerWidth/2,my=innerHeight/2,gx=mx,gy=my;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;dot.style.left=mx+'px';dot.style.top=my+'px';});
+(function anim(){gx+=(mx-gx)*.12;gy+=(my-gy)*.12;glow.style.left=gx+'px';glow.style.top=gy+'px';requestAnimationFrame(anim);})();
+
+// ===== 入场动画 =====
+document.addEventListener('DOMContentLoaded',()=>{
+  document.body.style.opacity='0';
+  requestAnimationFrame(()=>{
+    document.body.style.transition='opacity 0.5s ease';
+    document.body.style.opacity='1';
+  });
+
+  // 工具卡片 IntersectionObserver（可重复播放）
+  const cardObs = new IntersectionObserver(es=>{
+    es.forEach(e=>{
+      if(e.isIntersecting){ e.target.classList.add('revealed'); }
+      else { e.target.classList.remove('revealed'); }
+    });
+  },{threshold:0.15});
+  document.querySelectorAll('.tool-card').forEach(c=>cardObs.observe(c));
+});
+</script>
+</body>
+</html>
