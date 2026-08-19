@@ -85,19 +85,15 @@ main { padding-top:100px; max-width:1100px; margin:0 auto; padding-left:20px; pa
 .work-card.tjl:hover { border-color:var(--pink); box-shadow:0 12px 40px rgba(236,72,153,0.2); }
 .work-card.tjl::before { background:linear-gradient(90deg,var(--pink),var(--purple),#f59e0b); }
 
-/* 卡片2 专属 - ARG */
-.work-card.arg:hover { border-color:var(--cyan); box-shadow:0 12px 40px rgba(34,211,238,0.2); }
-.work-card.arg::before { background:linear-gradient(90deg,var(--cyan),var(--purple),var(--pink)); }
-
-/* 卡片3 专属 - 搞笑 */
+/* 卡片2 专属 - 搞笑 */
 .work-card.gx:hover { border-color:#f59e0b; box-shadow:0 12px 40px rgba(245,158,11,0.25); }
 .work-card.gx::before { background:linear-gradient(90deg,#f59e0b,#f43f5e,#a78bfa); }
 
-/* 卡片4 专属 - 账号发展模拟器 */
+/* 卡片3 专属 - 账号发展模拟器 */
 .work-card.sim:hover { border-color:#34d399; box-shadow:0 12px 40px rgba(52,211,153,0.25); }
 .work-card.sim::before { background:linear-gradient(90deg,#34d399,#22d3ee,#a78bfa); }
 
-/* 卡片5 专属 - 通缉令二 */
+/* 卡片4 专属 - 通缉令二 */
 .work-card.zjhtjl:hover { border-color:#ef4444; box-shadow:0 12px 40px rgba(239,68,68,0.25); }
 .work-card.zjhtjl::before { background:linear-gradient(90deg,#ef4444,#dc2626,#a78bfa); }
 
@@ -115,7 +111,6 @@ main { padding-top:100px; max-width:1100px; margin:0 auto; padding-left:20px; pa
 .works-grid .reveal:nth-child(3) { transition-delay:0.3s; }
 .works-grid .reveal:nth-child(4) { transition-delay:0.45s; }
 .works-grid .reveal:nth-child(5) { transition-delay:0.6s; }
-.works-grid .reveal:nth-child(6) { transition-delay:0.75s; }
 
 footer { text-align:center; padding:40px 20px; color:var(--text-dim); font-size:0.85rem; margin-top:60px; }
 
@@ -123,10 +118,18 @@ footer { text-align:center; padding:40px 20px; color:var(--text-dim); font-size:
   nav { padding:12px 16px; }
   nav ul li a { padding:6px 10px; font-size:0.85rem; }
 }
+
+/* ===== 生日主题 ===== */
+.birthday-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:9998;pointer-events:none;}
+body.birthday{--bg:#1a0d00;--purple:#f59e0b;--purple-light:#fde68a;--pink:#ef4444;--cyan:#fbbf24;--text:#fff7ed;--text-dim:#fdba74;--card:rgba(80,40,0,0.7);--card-border:rgba(245,158,11,0.35);}
+body.birthday .page-header h1{background:linear-gradient(135deg,#fde68a,#ef4444);-webkit-background-clip:text;}
+body.birthday .work-card{border-color:rgba(245,158,11,0.25);}
+body.birthday .work-card::before{background:linear-gradient(90deg,#f59e0b,#ef4444,#fbbf24)!important;}
+body.birthday .work-card:hover{box-shadow:0 12px 40px rgba(245,158,11,0.3);border-color:#f59e0b;}
 </style>
 </head>
 <body>
-
+<canvas class="birthday-canvas" id="bdCanvas"></canvas>
 <nav>
   <div class="logo">StarryIsland | 星空岛</div>
   <ul>
@@ -157,17 +160,9 @@ footer { text-align:center; padding:40px 20px; color:var(--text-dim); font-size:
       <a href="./tjl/" class="go-btn">查看通缉令 →</a>
     </div>
 
-    <!-- 作品2：ARG -->
-    <div class="work-card arg reveal">
-      <span class="emoji">🎭</span>
-      <h3>ARG 解谜实验</h3>
-      <p>一个正在进行的 ARG（替代现实游戏）实验项目。散落在各处的线索、隐藏页面、加密信息……你能找到真相吗？目前还在搭建中，部分谜题已可体验。</p>
-      <div class="tag">解谜 · ARG · 进行中</div>
-      <br>
-      <a href="./arg/" class="go-btn">进入解谜 →</a>
-    </div>
 
-    <!-- 作品3：搞笑页面 -->
+
+    <!-- 作品2：搞笑页面 -->
     <div class="work-card gx reveal">
       <span class="emoji">😂</span>
       <h3>搞笑页面</h3>
@@ -177,7 +172,7 @@ footer { text-align:center; padding:40px 20px; color:var(--text-dim); font-size:
       <a href="./gx/" class="go-btn">进去乐一下 →</a>
     </div>
 
-    <!-- 作品4：账号发展模拟器 -->
+    <!-- 作品3：账号发展模拟器 -->
     <div class="work-card sim reveal">
       <span class="emoji">📈</span>
       <h3>账号发展模拟器</h3>
@@ -187,7 +182,7 @@ footer { text-align:center; padding:40px 20px; color:var(--text-dim); font-size:
       <a href="./account-simulator/" class="go-btn">开始模拟 →</a>
     </div>
 
-    <!-- 作品5：通缉令二 -->
+    <!-- 作品4：通缉令二 -->
     <div class="work-card zjhtjl reveal">
       <span class="emoji">📋</span>
       <h3>通缉令二</h3>
@@ -221,6 +216,26 @@ const revObs = new IntersectionObserver(es=>{
   });
 },{threshold:0.2});
 document.querySelectorAll('.reveal').forEach(el=>revObs.observe(el));
+
+// ===== 生日主题 =====
+(function(){
+  var now=new Date();
+  if(now.getMonth()!==7||now.getDate()!==17)return;
+  document.body.classList.add('birthday');
+  var logo=document.querySelector('nav .logo');
+  if(logo&&!logo.dataset.bd){logo.dataset.bd='1';logo.textContent='🎂 '+logo.textContent+' 🎂';}
+  var h1=document.querySelector('.page-header h1');
+  if(h1&&!h1.dataset.bd){h1.dataset.bd='1';h1.textContent='🎂 我的作品 🎂';}
+  var c=document.getElementById('bdCanvas'),ctx=c.getContext('2d');
+  function rs(){c.width=innerWidth;c.height=innerHeight;}rs();window.addEventListener('resize',rs);
+  var colors=['#f59e0b','#ef4444','#fbbf24','#ec4899','#a78bfa','#34d399'];
+  var r=[];for(var i=0;i<70;i++)r.push({x:Math.random()*c.width,y:Math.random()*c.height-200,vx:(Math.random()-0.5)*2,vy:1+Math.random()*3,len:30+Math.random()*40,w:3+Math.random()*4,color:colors[~~(Math.random()*colors.length)],ang:Math.random()*Math.PI*2,va:(Math.random()-0.5)*0.1});
+  (function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    r.forEach(function(b){b.x+=b.vx;b.y+=b.vy;b.ang+=b.va;if(b.y>c.height){b.y=-20;b.x=Math.random()*c.width;}ctx.save();ctx.translate(b.x,b.y);ctx.rotate(b.ang);ctx.fillStyle=b.color;ctx.globalAlpha=0.85;ctx.fillRect(-b.w/2,0,b.w,b.len);ctx.restore();});
+    requestAnimationFrame(draw);
+  })();
+})();
 </script>
 </body>
 </html>
