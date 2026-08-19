@@ -1,1 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>关于本站 | 星空岛</title>
+<style>
+:root {
 
+  --bg:#0d0a1a;--purple:#a78bfa;--purple-light:#c4b5fd;--pink:#ec4899;
+  --text:#e8e0ff;--text-dim:#9ca3af;
+  --card:rgba(30,25,60,0.7);--card-border:rgba(167,139,250,0.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;line-height:1.7;cursor:none;}
+#cursor-glow{position:fixed;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(167,139,250,0.15) 0%,transparent 70%);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
+#cursor-dot{position:fixed;width:6px;height:6px;border-radius:50%;background:var(--purple);pointer-events:none;z-index:10000;transform:translate(-50%,-50%);box-shadow:0 0 8px var(--purple);}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:16px 40px;background:rgba(13,10,26,0.85);backdrop-filter:blur(12px);border-bottom:1px solid rgba(167,139,250,0.15);}
+nav .logo{font-size:1.4rem;font-weight:800;background:linear-gradient(135deg,var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px;}
+nav ul{display:flex;list-style:none;gap:8px;}
+nav ul li a{display:block;padding:8px 18px;color:var(--text-dim);text-decoration:none;border-radius:8px;font-size:0.95rem;transition:all 0.3s;}
+nav ul li a:hover{color:var(--purple-light);background:rgba(167,139,250,0.1);}
+nav ul li a.active{color:#fff;background:linear-gradient(135deg,#6d28d9,var(--pink));box-shadow:0 4px 15px rgba(167,139,250,0.4);}
+
+main{padding:100px 20px 40px;max-width:800px;margin:0 auto;}
+
+.page-header{text-align:center;margin-bottom:40px;}
+.page-header h1{font-size:clamp(2rem,5vw,3.5rem);font-weight:900;background:linear-gradient(135deg,var(--purple-light),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.page-header p{color:var(--text-dim);margin-top:10px;}
+
+.section{background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:30px;margin-bottom:24px;backdrop-filter:blur(10px);transition:all 0.3s;}
+.section:hover{transform:translateY(-2px);box-shadow:0 0 20px rgba(167,139,250,0.15);}
+.section h3{font-size:1.15rem;margin-bottom:14px;color:var(--purple-light);display:flex;align-items:center;gap:8px;}
+.section p,.section li{color:var(--text-dim);font-size:0.92rem;margin-bottom:8px;}
+.section ul{list-style:none;padding:0;}
+.section ul li{padding:4px 0;}
+
+/* reveal 动画（可重复）*/
+.reveal{opacity:0;transform:translateY(30px);transition:opacity 0.7s ease,transform 0.7s cubic-bezier(0.34,1.56,0.64,1);}
+.reveal.in-view{opacity:1;transform:translateY(0);}
+
+/* AI 声明高亮框 */
+.ai-banner{
+  background:linear-gradient(135deg,rgba(167,139,250,0.15),rgba(236,72,153,0.1));
+  border:2px dashed var(--pink);border-radius:14px;padding:28px;margin-bottom:24px;
+  text-align:center;position:relative;overflow:hidden;
+}
+.ai-banner::before{
+  content:'🤖';position:absolute;top:-10px;right:-10px;font-size:4rem;opacity:0.1;
+}
+.ai-banner .label{font-size:0.8rem;color:var(--pink);font-weight:700;letter-spacing:2px;margin-bottom:8px;}
+.ai-banner .main{font-size:1.15rem;color:var(--text);line-height:1.8;}
+.ai-banner .sub{font-size:0.85rem;color:var(--text-dim);margin-top:10px;}
+
+/* 技术栈标签 */
+.tech-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;}
+.tech-tags span{
+  padding:5px 14px;border-radius:16px;font-size:0.8rem;
+  background:rgba(167,139,250,0.1);border:1px solid var(--card-border);color:var(--purple-light);
+}
+.tech-tags span:nth-child(2n){background:rgba(236,72,153,0.1);border-color:rgba(236,72,153,0.2);color:#f9a8d4;}
+.tech-tags span:nth-child(3n){background:rgba(34,211,238,0.1);border-color:rgba(34,211,238,0.2);color:#67e8f9;}
+
+/* 数据表格 */
+.data-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+.data-item{background:rgba(13,10,26,0.4);padding:12px 16px;border-radius:10px;border:1px solid rgba(167,139,250,0.1);}
+.data-item .di-label{font-size:0.78rem;color:var(--text-dim);}
+.data-item .di-val{font-size:1rem;color:var(--text);font-weight:600;margin-top:2px;}
+
+/* 承诺清单 */
+.promise-list{list-style:none;}
+.promise-list li{
+  padding:10px 0;border-bottom:1px solid rgba(167,139,250,0.08);
+  display:flex;align-items:center;gap:10px;font-size:0.92rem;color:var(--text-dim);
+}
+.promise-list li:last-child{border-bottom:none;}
+.promise-list .check{color:#34d399;font-weight:700;}
+
+footer{text-align:center;padding:30px 20px;color:var(--text-dim);font-size:0.85rem;}
+
+@media(max-width:768px){
+  nav{padding:12px 16px;}nav ul li a{padding:6px 10px;font-size:0.85rem;}
+  body{cursor:auto;}#cursor-glow,#cursor-dot{display:none;}
+  .data-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<div id="cursor-glow"></div><div id="cursor-dot"></div>
+
+<nav>
+  <div class="logo">StarryIsland | 星空岛</div>
+  <ul>
+    <li><a href="../">首页</a></li>
+    <li><a href="../works/">作品</a></li>
+    <li><a href="../about/">关于我</a></li>
+    <li><a href="../contact/">联系我</a></li>
+    <li><a href="./" class="active">关于本站</a></li>
+    <li><a href="../tools/">推荐工具</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="page-header">
+    <h1>关于本站</h1>
+    <p>坦白局，不装</p>
+  </div>
+
+  <div class="ai-banner">
+    <div class="label">⚠ 重要声明</div>
+    <div class="main">
+      本网站由 <strong style="color:var(--pink)">AI 辅助搭建</strong>，非纯手工编写。<br>
+      站长本人啥也不会，只会按 F12 和 Ctrl+C/V。
+    </div>
+    <div class="sub">如果代码有 Bug，那一定是 AI 偷偷改的。如果网站能跑，那全是 AI 的功劳。</div>
+  </div>
+
+  <div class="section reveal">
+    <h3>📋 基本信息</h3>
+    <ul>
+      <li><strong>站名：</strong>星空岛 ✦ StarryIsland</li>
+      <li><strong>建站时间：</strong>2026 年 8 月</li>
+      <li><strong>站长：</strong>一个普通学生，学渣，啥也不会</li>
+      <li><strong>所在地：</strong>江西上饶</li>
+      <li><strong>定位：</strong>个人小窝，记录折腾过程，顺便搞笑</li>
+    </ul>
+  </div>
+
+  <div class="section reveal">
+    <h3>🛠️ 技术栈（其实是 AI 的技术栈）</h3>
+    <p>本站使用的技术，全都是 AI 帮我写的，我只负责说"不对，改一下"：</p>
+    <div class="tech-tags">
+      <span>HTML5</span>
+      <span>CSS3</span>
+      <span>JavaScript (ES6+)</span>
+      <span>Canvas API</span>
+      <span>localStorage</span>
+      <span>IntersectionObserver</span>
+      <span>CSS Grid & Flex</span>
+      <span>CSS Animations</span>
+      <span>Backdrop Filter</span>
+      <span>Gradient & Blur</span>
+    </div>
+    <p style="margin-top:14px;font-size:0.85rem;">站长的实际水平：能打开记事本，能复制粘贴，能按 F5 刷新。</p>
+  </div>
+
+  <div class="section reveal">
+    <h3>📊 本站数据（自娱自乐）</h3>
+    <div class="data-grid">
+      <div class="data-item">
+        <div class="di-label">建站天数</div>
+        <div class="di-val" id="days-count">0 天</div>
+      </div>
+      <div class="data-item">
+        <div class="di-label">AI 写的代码行数</div>
+        <div class="di-val">≈ 999 行</div>
+      </div>
+      <div class="data-item">
+        <div class="di-label">站长写的代码行数</div>
+        <div class="di-val">≈ 0 行</div>
+      </div>
+      <div class="data-item">
+        <div class="di-label">本站页面数</div>
+        <div class="di-val">7 个</div>
+      </div>
+      <div class="data-item">
+        <div class="di-label">电脑蓝屏次数</div>
+        <div class="di-val" id="bsod-count">∞ 次</div>
+      </div>
+      <div class="data-item">
+        <div class="di-label">咖啡消耗量</div>
+        <div class="di-val">128 杯（假的）</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section reveal">
+    <h3>✅ 本站承诺</h3>
+    <ul class="promise-list">
+      <li><span class="check">✔</span> 不挂广告（没人投我也没办法）</li>
+      <li><span class="check">✔</span> 不卖你的数据（你也没啥可卖的）</li>
+      <li><span class="check">✔</span> 不放弹窗（弹幕不算弹窗吧？）</li>
+      <li><span class="check">✔</span> 不收集隐私（localStorage 里的弹幕不算）</li>
+      <li><span class="check">✔</span> 代码开源（都在这一个 zip 里了）</li>
+      <li><span class="check">✔</span> 不装大佬（这是底线）</li>
+    </ul>
+  </div>
+
+  <div class="section reveal">
+    <h3>⚖️ 免责声明</h3>
+    <p>本站所有内容（除特别标注外）均为个人创作或 AI 辅助生成，仅供娱乐和学习参考。</p>
+    <p>通缉令页面纯属恶搞，与任何真实人物、事件无关。如感不适，建议喝杯奶茶压压惊。</p>
+    <p>本站不保证 24 小时在线，毕竟站长还要上课（虽然也在摸鱼）。</p>
+  </div>
+</main>
+
+<footer>
+  <p>© 2026 星空岛 ✦ 本站由 AI 辅助搭建 | 代码非纯手工 | 站长啥也不会</p>
+</footer>
+
+<script>
+// reveal 元素 IntersectionObserver（可重复播放）
+const revObs = new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(e.isIntersecting){ e.target.classList.add('in-view'); }
+    else { e.target.classList.remove('in-view'); }
+  });
+},{threshold:0.2});
+document.querySelectorAll('.reveal').forEach(el=>revObs.observe(el));
+
+// 建站天数
+const start=new Date('2026-08-01');
+document.getElementById('days-count').textContent=Math.floor((new Date()-start)/86400000)+' 天';
+</script>
+</body>
+</html>
