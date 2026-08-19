@@ -1,0 +1,8 @@
+# 指定404错误使用我们自己的页面
+ErrorDocument 404 /404.html
+
+# 500服务器内部错误页面（可选，你可以再加500.html）
+#ErrorDocument 500 /500.html
+
+# 默认首页优先读取 index.html
+DirectoryIndex index.html index.php
