@@ -1,1 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>互动页面</title>
+<style>
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+html,body{
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #111;
+  position: relative;
+}
+/* 页面随机按钮 */
+.action-btn{
+  position: absolute;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  z-index: 5;
+}
+/* 碎裂动画 */
+.break-ani{
+  animation: breakAni 0.5s forwards;
+}
+@keyframes breakAni{
+  0%{opacity:1; transform: scale(1);}
+  100%{opacity:0; transform: scale(1.8) rotate(15deg);}
+}
+/* 向上飞走动画 */
+.fly-ani{
+  animation: flyAway 0.6s forwards;
+}
+@keyframes flyAway{
+  0%{opacity:1;}
+  100%{opacity:0; transform: translateY(-120vh) rotate(20deg);}
+}
+/* 最终返回按钮 */
+.back-home{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  padding: 14px 32px;
+  font-size: 20px;
+  background: #28c76f;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  display: none;
+  z-index: 10;
+}
+/* 右下角版本号 */
+.version-info{
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  color: #aaa;
+  font-size: 13px;
+  z-index: 99;
+}
+/* 左下角更新日志 */
+.log-btn{
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  color: #99ccff;
+  font-size: 13px;
+  cursor: pointer;
+  z-index: 99;
+}
+.log-modal{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+.log-box{
+  background: #222;
+  color: #fff;
+  padding: 24px;
+  border-radius: 10px;
+  max-width: 420px;
+  line-height: 1.7;
+}
+.close-log{
+  margin-top: 16px;
+  padding: 6px 16px;
+  cursor: pointer;
+}
+/* 背景漂浮装饰 */
+.float-emoji {
+  position: absolute;
+  font-size: 32px;
+  animation: smallFloat 10s ease-in-out infinite alternate;
+  user-select: none;
+  pointer-events: none;
+}
+@keyframes smallFloat{
+  0%{transform: translate(-8px,-8px) rotate(0deg);}
+  100%{transform: translate(8px,8px) rotate(360deg);}
+}
+</style>
+</head>
+<body>
+<div id="btnBox"></div>
+<button class="back-home" id="backBtn">返回首页</button>
 
+<div class="version-info">v1.3</div>
+
+<div class="log-btn" id="openLog">更新日志</div>
+<div class="log-modal" id="logModal">
+  <div class="log-box">
+    <h3>版本更新日志</h3>
+    <p>v1.0：基础页面，投币+赞助按钮互动</p>
+    <p>v1.1：限制表情活动范围，解决按钮误触问题</p>
+    <p>v1.2：新增页面跳转结构，hun文件夹分页</p>
+    <p>v1.3：移除解锁检测，新增大量随机按钮碎裂/飞走效果</p>
+    <button class="close-log" id="closeLogBtn">关闭</button>
+  </div>
+</div>
+
+<script>
+// 背景漂浮元素
+const emojiList = ['🌙','💩','🤡','🌕','🌚'];
+function buildEmoji(){
+  const el = document.createElement('div');
+  el.className = 'float-emoji';
+  el.innerText = emojiList[Math.floor(Math.random()*emojiList.length)];
+  el.style.left = 2 + Math.random()*94 + '%';
+  el.style.top = 2 + Math.random()*68 + '%';
+  document.body.appendChild(el);
+}
+for(let i=0;i<22;i++) buildEmoji();
+
+// 随机按钮配置
+const btnTexts = ["点我碎裂","向上飞走","炸开","消散","升空","崩碎","消失","飘走"];
+const colors = ["#4285f4","#ff4d4f","#722ed1","#fa8c16","#13c2c2","#eb2f96","#52c41a","#f7ba1e"];
+const totalBtn = 8;
+let finishCount = 0;
+const btnBox = document.getElementById('btnBox');
+const backBtn = document.getElementById('backBtn');
+
+for(let i=0; i<totalBtn; i++){
+  const btn = document.createElement('button');
+  btn.className = 'action-btn';
+  btn.innerText = btnTexts[i];
+  btn.style.background = colors[i];
+  // 避开角落版本与日志控件
+  btn.style.left = 8 + Math.random()*82 + '%';
+  btn.style.top = 8 + Math.random()*75 + '%';
+  const flyMode = Math.random() > 0.5 ? 'break' : 'fly';
+
+  btn.onclick = function(){
+    if(flyMode === 'break'){
+      this.classList.add('break-ani');
+    }else{
+      this.classList.add('fly-ani');
+    }
+    finishCount += 1;
+    // 全部按钮消失，显示返回按钮
+    if(finishCount >= totalBtn){
+      setTimeout(()=>{
+        backBtn.style.display = 'block';
+      },300);
+    }
+    this.onclick = null;
+  }
+  btnBox.appendChild(btn);
+}
+
+// 核心：../ 回到上级文件夹，不写死任何文件夹名称
+backBtn.onclick = function(){
+  window.location.href = "../";
+}
+
+// 更新日志弹窗逻辑
+const openLog = document.getElementById('openLog');
+const logModal = document.getElementById('logModal');
+const closeLogBtn = document.getElementById('closeLogBtn');
+openLog.onclick = ()=> logModal.style.display = 'flex';
+closeLogBtn.onclick = ()=> logModal.style.display = 'none';
+logModal.onclick = function(e){
+  if(e.target === logModal) logModal.style.display = 'none';
+}
+</script>
+</body>
+</html>
