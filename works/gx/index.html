@@ -1,1 +1,328 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Win95 桌面小游戏主页</title>
+<style>
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "MS Sans Serif",sans-serif;
+}
+html,body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #008080;
+  position: relative;
+}
 
+.back-works-btn{
+  position: fixed;
+  top:12px;
+  left:12px;
+  padding:6px 14px;
+  border:2px outset #fff;
+  background:#c0c0c0;
+  cursor:pointer;
+  z-index:999;
+  font-size:14px;
+}
+.back-works-btn:active{
+  border:2px inset #666;
+}
+
+.desktop-icon{
+  width:70px;
+  text-align:center;
+  color:#fff;
+  position:absolute;
+  cursor:pointer;
+}
+.desktop-icon img{
+  width:42px;
+  margin-bottom:4px;
+}
+.my-pc{
+  top:60px;
+  left:30px;
+}
+
+.tip-coin {
+  position: absolute;
+  top: 12vh;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 36px;
+  color: #fff;
+  cursor: pointer;
+  z-index: 10;
+}
+.fly-out {
+  animation: flyAway 0.6s forwards;
+}
+@keyframes flyAway {
+  100% {
+    transform: translateX(200vw) translateY(-30vh);
+    opacity: 0;
+  }
+}
+
+.slot-window{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 280px;
+  height: 360px;
+  background:#c0c0c0;
+  border:2px outset #ffffff;
+  z-index: 2;
+}
+.win-title-bar{
+  background:#000080;
+  color:white;
+  padding:3px 6px;
+  display:flex;
+  justify-content:space-between;
+  font-size:13px;
+}
+.slot-inner{
+  height:calc(100% - 22px);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+.break-left {
+  animation: breakLeft 0.6s forwards;
+}
+.break-right {
+  animation: breakRight 0.6s forwards;
+}
+@keyframes breakLeft {
+  100% {
+    transform: translate(-100%, -50%) rotate(-15deg);
+    opacity: 0;
+  }
+}
+@keyframes breakRight {
+  100% {
+    transform: translate(0%, -50%) rotate(15deg);
+    opacity: 0;
+  }
+}
+
+.more-btn {
+  position: absolute;
+  top: 50%;
+  left: calc(50% + 160px);
+  transform: translateY(-50%);
+  padding: 8px 18px;
+  font-size: 15px;
+  border:2px outset white;
+  background:#c0c0c0;
+  cursor: pointer;
+  z-index: 3;
+}
+.more-btn:active{
+  border:2px inset #666;
+}
+
+.donate-btn {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 28px;
+  font-size: 16px;
+  border:2px outset #fff;
+  background:#c0c0c0;
+  cursor: pointer;
+  z-index: 9;
+}
+.donate-fly {
+  animation: donateFly 0.7s forwards;
+}
+@keyframes donateFly {
+  100% {
+    transform: translate(200vw, -40vh);
+    opacity: 0;
+  }
+}
+.fly-tip {
+  position: fixed;
+  bottom: 35px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #ffffff;
+  font-size: 20px;
+  display: none;
+  z-index: 9;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 20;
+  align-items: center;
+  justify-content: center;
+}
+.modal-box {
+  background: #c0c0c0;
+  border:2px outset white;
+  padding: 26px;
+  text-align: center;
+}
+.close-modal {
+  margin-top: 16px;
+  padding: 6px 18px;
+  border:2px outset #fff;
+  background:#c0c0c0;
+  cursor: pointer;
+}
+.close-modal:active{
+  border:2px inset #666;
+}
+
+.float-emoji {
+  position: absolute;
+  font-size: 32px;
+  animation: floatMove 12s ease-in-out infinite alternate;
+  user-select: none;
+  pointer-events:none;
+}
+@keyframes floatMove {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  100% { transform: translate(0, 0) rotate(360deg); }
+}
+</style>
+</head>
+<body>
+<button class="back-works-btn" id="backWorksBtn">返回上一级</button>
+
+<div class="desktop-icon my-pc">
+  <svg width="42" height="42" viewBox="0 0 48 48" fill="none">
+    <rect x="6" y="10" width="36" height="28" fill="#c0c0c0" stroke="#222" stroke-width="2"/>
+    <rect x="10" y="14" width="28" height="18" fill="#0066cc"/>
+    <rect x="16" y="34" width="16" height="4" fill="#666"/>
+  </svg>
+  <div>此电脑</div>
+</div>
+
+<div class="tip-coin" id="coinTip">请投币</div>
+
+<div class="slot-window" id="slotMachine">
+  <div class="win-title-bar">老虎机小游戏 <span>×</span></div>
+  <div class="slot-inner">
+    <div style="font-size:22px;margin-bottom:16px;">老虎机</div>
+    <div style="font-size:13px;color:#333;">连续点击10次碎裂</div>
+  </div>
+</div>
+
+<button class="more-btn" id="moreBtn">还有呢</button>
+
+<button class="donate-btn" id="donateBtn">请我喝杯咖啡 / 吃颗糖（自愿赞助）</button>
+<div class="fly-tip" id="flyText">我飞走喽</div>
+
+<div class="modal" id="donateModal">
+  <div class="modal-box">
+    <p>赞助弹窗内容</p>
+    <button class="close-modal" id="closeModal">关闭</button>
+  </div>
+</div>
+
+<script>
+    const emojiList = ['🌙','💩','🤡','🌕','🌚'];
+    const maxEmoji = 25;
+    function createFloatEmoji() {
+        const emoji = document.createElement('div');
+        emoji.className = 'float-emoji';
+        emoji.innerText = emojiList[Math.floor(Math.random() * emojiList.length)];
+        const leftPercent = 2 + Math.random() * 94;
+        const topPercent = 2 + Math.random() * 70;
+        emoji.style.left = `${leftPercent}%`;
+        emoji.style.top = `${topPercent}%`;
+        const moveRangeX = (Math.random() * 22) - 11;
+        const moveRangeY = (Math.random() * 22) - 11;
+        emoji.style.animation = `floatMove ${9 + Math.random() * 7}s ease-in-out infinite alternate`;
+        emoji.style.transform = `translate(${moveRangeX}px, ${moveRangeY}px)`;
+        document.body.appendChild(emoji);
+    }
+    for(let i = 0; i < maxEmoji; i++) createFloatEmoji();
+
+    // 只返回上一级文件夹，无固定文件夹名称
+    document.getElementById('backWorksBtn').onclick = function(){
+        window.location.href = "../";
+    }
+
+    const coinTip = document.getElementById('coinTip');
+    let coinClickCount = 0;
+    let coinFly = false;
+    coinTip.addEventListener('click', ()=>{
+        coinClickCount++;
+        if(coinClickCount >= 10){
+            coinTip.classList.add('fly-out');
+            coinFly = true;
+        }
+    })
+
+    const slot = document.getElementById('slotMachine');
+    let slotClick = 0;
+    let broken = false;
+    slot.addEventListener('click', ()=>{
+        if(broken) return;
+        slotClick++;
+        slot.style.transform = `translate(-50%, -50%) rotate(${slotClick * 3}deg)`;
+        if(slotClick >= 10){
+            broken = true;
+            const rightPart = slot.cloneNode(true);
+            slot.parentNode.appendChild(rightPart);
+            slot.classList.add('break-left');
+            rightPart.classList.add('break-right');
+        }
+    })
+
+    const moreBtn = document.getElementById('moreBtn');
+    moreBtn.addEventListener('click', function(){
+        const donateBtn = document.getElementById('donateBtn');
+        const donateFlied = donateBtn.classList.contains('donate-fly');
+        if(coinFly && donateFlied){
+            localStorage.setItem('gamePass', '1');
+        } else {
+            localStorage.removeItem('gamePass');
+        }
+        window.location.href = "./hun/index.html";
+    })
+
+    const donateBtn = document.getElementById('donateBtn');
+    const donateModal = document.getElementById('donateModal');
+    const closeModal = document.getElementById('closeModal');
+    const flyText = document.getElementById('flyText');
+    let donateClickCount = 0;
+    let hasFly = false;
+
+    donateBtn.addEventListener('click', ()=>{
+        if(hasFly) return;
+        donateClickCount++;
+        if(donateClickCount < 5){
+            donateModal.style.display = 'flex';
+        }else{
+            donateBtn.classList.add('donate-fly');
+            flyText.style.display = 'block';
+            hasFly = true;
+        }
+    });
+
+    closeModal.onclick = ()=> donateModal.style.display = 'none';
+    donateModal.onclick = (e)=> {
+        if(e.target === donateModal) donateModal.style.display = 'none';
+    }
+</script>
+</body>
+</html>
