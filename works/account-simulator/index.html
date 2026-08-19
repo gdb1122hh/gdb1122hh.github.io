@@ -1,1 +1,2197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>抖音创作者中心</title>
+<style>
+/* ========== 全局重置 ========== */
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --dy-primary: #fe2c55;
+  --dy-primary-light: #ff4d6d;
+  --dy-dark: #161823;
+  --dy-dark-2: #1e1f2b;
+  --dy-dark-3: #232533;
+  --dy-gray: #8a8b99;
+  --dy-gray-2: #4a4b5a;
+  --dy-border: #2a2b38;
+  --dy-green: #00d4aa;
+  --dy-orange: #ff8c00;
+  --dy-gold: #ffd700;
+  --dy-blue: #3b82f6;
+  --dy-purple: #a855f7;
+  --dy-bg: #0f1015;
+  --dy-card: #1c1d28;
+  --dy-text: #e8e8ec;
+  --dy-subtext: #9b9ba6;
+}
+html, body {
+  font-family: "PingFang SC", "Helvetica Neue", "Microsoft YaHei", sans-serif;
+  background: var(--dy-bg);
+  color: var(--dy-text);
+  overflow: hidden;
+  height: 100vh;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: var(--dy-gray-2); border-radius: 2px; }
 
+/* ========== 账号封禁状态 ========== */
+.account-banned .top-avatar,
+.account-banned .profile-avatar {
+  filter: grayscale(1) opacity(0.4);
+}
+.account-banned .top-name,
+.account-banned .profile-name {
+  color: var(--dy-subtext) !important;
+}
+@keyframes numberDrop {
+  0% { transform: translateY(-2px); opacity: 0.5; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.warning-banner {
+  display: none;
+  background: linear-gradient(90deg, rgba(254,44,85,0.2), rgba(254,44,85,0.05));
+  border: 1px solid rgba(254,44,85,0.4);
+  color: var(--dy-primary);
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  animation: warningPulse 2s infinite;
+}
+@keyframes warningPulse {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* ========== 注册页 ========== */
+.register-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: linear-gradient(135deg, #0a0a14 0%, #1a0a2e 50%, #0d1117 100%);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; padding: 20px;
+}
+.register-overlay.hidden { display: none; }
+.register-card {
+  background: var(--dy-dark-2);
+  border: 1px solid var(--dy-border);
+  border-radius: 20px;
+  padding: 36px 28px;
+  width: 100%; max-width: 380px;
+  text-align: center;
+}
+.register-card h1 {
+  font-size: 28px; font-weight: 800;
+  background: linear-gradient(135deg, var(--dy-primary), var(--dy-purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 6px;
+}
+.register-card .subtitle { color: var(--dy-gray); font-size: 13px; margin-bottom: 28px; }
+.step { display: none; }
+.step.active { display: block; }
+.step-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+.avatar-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+  margin-bottom: 24px;
+}
+.avatar-cell {
+  aspect-ratio: 1; border-radius: 50%;
+  background: var(--dy-dark-3); display: flex; align-items: center; justify-content: center;
+  font-size: 28px; cursor: pointer; transition: all .2s;
+  border: 2px solid transparent;
+}
+.avatar-cell:hover { transform: scale(1.1); }
+.avatar-cell.selected { border-color: var(--dy-primary); background: rgba(255,44,85,.15); }
+.field-input {
+  width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--dy-border);
+  background: var(--dy-dark-3); color: #fff; font-size: 15px; outline: none;
+  margin-bottom: 12px; transition: border .2s;
+}
+.field-input:focus { border-color: var(--dy-primary); }
+.niche-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.niche-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 16px; border-radius: 12px; background: var(--dy-dark-3);
+  border: 2px solid transparent; cursor: pointer; transition: all .2s;
+}
+.niche-item:hover { background: var(--dy-dark); }
+.niche-item.selected { border-color: var(--dy-primary); background: rgba(255,44,85,.1); }
+.niche-icon { font-size: 24px; width: 36px; text-align: center; }
+.niche-info { flex: 1; text-align: left; }
+.niche-name { font-size: 15px; font-weight: 600; }
+.niche-desc { font-size: 12px; color: var(--dy-gray); margin-top: 2px; }
+.btn-primary {
+  width: 100%; padding: 14px; border: none; border-radius: 12px;
+  background: linear-gradient(135deg, var(--dy-primary), #ff6b81);
+  color: #fff; font-size: 16px; font-weight: 700; cursor: pointer;
+  transition: transform .15s, opacity .2s;
+}
+.btn-primary:active { transform: scale(.97); }
+.btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+.btn-secondary {
+  width: 100%; padding: 12px; border: 1px solid var(--dy-border); border-radius: 12px;
+  background: transparent; color: var(--dy-gray); font-size: 14px; cursor: pointer;
+  margin-top: 10px;
+}
+.step-dots { display: flex; justify-content: center; gap: 6px; margin-top: 20px; }
+.step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dy-gray-2); }
+.step-dot.active { background: var(--dy-primary); }
+
+/* ========== 主布局 ========== */
+.app-container {
+  display: flex; height: 100vh; width: 100vw;
+}
+.app-container.hidden { display: none; }
+
+/* 左侧导航 */
+.sidebar {
+  width: 72px; background: var(--dy-dark-2); border-right: 1px solid var(--dy-border);
+  display: flex; flex-direction: column; align-items: center; padding: 16px 0;
+  flex-shrink: 0; z-index: 100;
+}
+.sidebar-logo {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--dy-primary), var(--dy-purple));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 900; margin-bottom: 24px;
+}
+.sidebar-item {
+  width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; cursor: pointer; margin-bottom: 8px; transition: all .2s; position: relative;
+  color: var(--dy-gray);
+}
+.sidebar-item:hover { background: var(--dy-dark-3); color: #fff; }
+.sidebar-item.active { background: rgba(255,44,85,.15); color: var(--dy-primary); }
+.sidebar-item .tooltip {
+  position: absolute; left: 60px; top: 50%; transform: translateY(-50%);
+  background: var(--dy-dark-3); padding: 6px 12px; border-radius: 6px; font-size: 12px;
+  white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .2s;
+  z-index: 200;
+}
+.sidebar-item:hover .tooltip { opacity: 1; }
+.sidebar-spacer { flex: 1; }
+.sidebar-avatar {
+  width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; border: 2px solid var(--dy-border); cursor: pointer;
+}
+
+/* 主内容区 */
+.main-content {
+  flex: 1; overflow-y: auto; overflow-x: hidden; position: relative;
+}
+
+/* ========== 顶部状态栏（仿抖音个人主页） ========== */
+.top-bar {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(15,16,21,.92); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--dy-border);
+  padding: 0; display: block;
+}
+/* 背景横幅 */
+.profile-banner {
+  height: 100px; width: 100%;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 30%, #0f3460 60%, #1a1a3e 100%);
+  position: relative; overflow: hidden;
+}
+.profile-banner::after {
+  content: '✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦';
+  position: absolute; bottom: 8px; left: 0; right: 0;
+  font-size: 10px; color: rgba(255,255,255,0.08); letter-spacing: 4px;
+  white-space: nowrap; overflow: hidden;
+}
+/* 用户信息区 */
+.profile-info {
+  padding: 0 16px 12px; display: flex; align-items: flex-start; gap: 14px;
+  margin-top: -30px; position: relative; z-index: 2;
+}
+.profile-avatar {
+  width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 36px; border: 3px solid var(--dy-bg); background: var(--dy-card);
+  flex-shrink: 0; transition: filter 0.5s;
+}
+.profile-main { flex: 1; min-width: 0; }
+.profile-name-row { display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+.profile-name { font-size: 18px; font-weight: 700; color: #fff; transition: color 0.5s; }
+.profile-verify { color: var(--dy-blue); font-size: 14px; }
+.profile-handle { font-size: 12px; color: var(--dy-subtext); margin-bottom: 6px; }
+.profile-bio { font-size: 12px; color: var(--dy-subtext); line-height: 1.4; }
+.profile-uid { font-size: 11px; color: var(--dy-gray-2); margin-top: 2px; }
+/* 数据行 */
+.profile-stats {
+  display: flex; gap: 0; padding: 10px 16px;
+  border-top: 1px solid var(--dy-border);
+}
+.profile-stat {
+  flex: 1; text-align: center; cursor: default;
+}
+.profile-stat-num {
+  font-size: 16px; font-weight: 800; color: #fff; display: block;
+  transition: color 0.3s;
+}
+.profile-stat-label {
+  font-size: 11px; color: var(--dy-subtext); margin-top: 2px;
+}
+/* 顶部右侧 */
+.top-bar-right {
+  position: absolute; top: 12px; right: 16px; z-index: 3;
+  display: flex; align-items: center; gap: 8px;
+}
+.day-counter {
+  background: rgba(255,255,255,0.1); padding: 4px 12px; border-radius: 12px;
+  font-size: 11px; font-weight: 600; color: var(--dy-gold);
+  backdrop-filter: blur(6px);
+}
+.live-indicator {
+  display: flex; align-items: center; gap: 4px;
+  background: rgba(254,44,85,.15); padding: 4px 10px; border-radius: 12px;
+  font-size: 11px; color: var(--dy-primary); font-weight: 600;
+}
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--dy-primary); animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+/* 兼容旧top-avatar等 */
+.top-avatar { display:none; }
+.top-name { display:none; }
+.top-handle { display:none; }
+.top-stats { display:none; }
+
+/* ========== 数据看板 ========== */
+.dashboard-section { padding: 16px; }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.section-title { font-size: 16px; font-weight: 700; color: #fff; }
+.section-more { font-size: 12px; color: var(--dy-subtext); cursor: pointer; }
+
+/* 功能入口横幅（仿抖音订单/钱包等入口） */
+.feature-banner {
+  display: flex; gap: 0; padding: 12px 8px;
+  background: var(--dy-card); border-radius: 12px;
+  margin-bottom: 16px; border: 1px solid var(--dy-border);
+}
+.feature-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-size: 11px; color: var(--dy-subtext); cursor: pointer;
+  transition: color 0.2s;
+}
+.feature-item:hover { color: #fff; }
+.feature-icon {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; margin-bottom: 2px;
+}
+.feature-icon.pink { background: rgba(254,44,85,0.12); }
+.feature-icon.blue { background: rgba(59,130,246,0.12); }
+.feature-icon.gold { background: rgba(255,215,0,0.12); }
+.feature-icon.green { background: rgba(0,212,170,0.12); }
+.feature-icon.purple { background: rgba(168,85,247,0.12); }
+
+.data-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px; }
+.data-card {
+  background: var(--dy-card); border: 1px solid var(--dy-border); border-radius: 12px;
+  padding: 14px 12px; position: relative; overflow: hidden;
+}
+.data-card::before {
+  content: ''; position: absolute; top: 0; right: 0; width: 50px; height: 50px;
+  border-radius: 50%; transform: translate(15px,-15px); opacity: .06;
+}
+.data-card.fans::before { background: var(--dy-primary); }
+.data-card.likes::before { background: var(--dy-gold); }
+.data-card.views::before { background: var(--dy-blue); }
+.data-card.works::before { background: var(--dy-green); }
+.data-label { font-size: 12px; color: var(--dy-subtext); margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+.data-value { font-size: 22px; font-weight: 800; color: #fff; }
+.data-change { font-size: 11px; margin-top: 4px; font-weight: 600; }
+.data-change.up { color: var(--dy-green); }
+.data-change.down { color: var(--dy-primary); }
+
+/* 迷你折线图 */
+.mini-chart { height: 32px; margin-top: 8px; display: flex; align-items: flex-end; gap: 2px; }
+.mini-bar { flex: 1; border-radius: 2px 2px 0 0; transition: height .5s; opacity: .7; }
+.mini-bar:hover { opacity: 1; }
+
+/* ========== 作品列表（仿抖音作品网格） ========== */
+.works-section-header {
+  display: flex; align-items: center; gap: 16px;
+  padding: 4px 0 12px; border-bottom: 1px solid var(--dy-border); margin-bottom: 12px;
+}
+.works-tab {
+  font-size: 14px; font-weight: 600; color: var(--dy-subtext);
+  padding-bottom: 6px; cursor: pointer; position: relative;
+}
+.works-tab.active { color: #fff; }
+.works-tab.active::after {
+  content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 20px; height: 2px; background: var(--dy-primary); border-radius: 1px;
+}
+.works-count-badge {
+  font-size: 12px; color: var(--dy-subtext); margin-left: auto;
+}
+.works-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
+.work-card {
+  position: relative; aspect-ratio: 3/4; border-radius: 4px; overflow: hidden;
+  cursor: pointer; background: var(--dy-card); border: none;
+}
+.work-cover {
+  width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;
+  font-size: 36px; position: relative;
+}
+.work-cover .cover-overlay {
+  position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,.8) 100%);
+}
+.work-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 8px 6px; z-index: 2; }
+.work-title { font-size: 11px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; }
+.work-meta { display: flex; align-items: center; gap: 8px; margin-top: 3px; font-size: 10px; color: rgba(255,255,255,.75); }
+.work-meta span { display: flex; align-items: center; gap: 2px; }
+.work-duration {
+  position: absolute; top: 6px; right: 6px; background: rgba(0,0,0,.6);
+  padding: 1px 5px; border-radius: 3px; font-size: 10px; z-index: 2;
+}
+.work-views-badge {
+  position: absolute; top: 6px; left: 6px; background: rgba(254,44,85,.85);
+  padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; z-index: 2;
+}
+
+/* ========== 事件流 ========== */
+.event-feed { max-width: 680px; margin: 0 auto; padding: 16px; }
+.event-item {
+  display: flex; gap: 12px; padding: 12px; border-radius: 10px;
+  background: var(--dy-card); border: 1px solid var(--dy-border);
+  margin-bottom: 8px; animation: slideIn .4s ease;
+}
+@keyframes slideIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+.event-icon-wrap {
+  width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.event-icon-wrap.positive { background: rgba(0,212,170,.12); }
+.event-icon-wrap.negative { background: rgba(254,44,85,.12); }
+.event-icon-wrap.neutral  { background: rgba(59,130,246,.12); }
+.event-icon-wrap.legendary { background: rgba(255,215,0,.12); }
+.event-body { flex: 1; min-width: 0; }
+.event-header { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.event-type-tag {
+  font-size: 9px; padding: 1px 6px; border-radius: 8px; font-weight: 600;
+}
+.tag-pos { background: rgba(0,212,170,.2); color: var(--dy-green); }
+.tag-neg { background: rgba(254,44,85,.2); color: var(--dy-primary); }
+.tag-neu { background: rgba(59,130,246,.2); color: var(--dy-blue); }
+.tag-leg { background: rgba(255,215,0,.2); color: var(--dy-gold); }
+.event-time { font-size: 10px; color: var(--dy-gray-2); margin-left: auto; }
+.event-title { font-size: 14px; font-weight: 600; margin-bottom: 2px; color: #fff; }
+.event-desc { font-size: 12px; color: var(--dy-subtext); line-height: 1.4; }
+.event-impact { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+.impact-chip {
+  font-size: 11px; padding: 2px 8px; border-radius: 6px; font-weight: 600;
+}
+.impact-up { background: rgba(0,212,170,.1); color: var(--dy-green); }
+.impact-down { background: rgba(254,44,85,.1); color: var(--dy-primary); }
+.impact-info { background: rgba(59,130,246,.1); color: var(--dy-blue); }
+
+/* ========== 数据分析页 ========== */
+.analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.analytics-card {
+  background: var(--dy-card); border: 1px solid var(--dy-border); border-radius: 12px;
+  padding: 16px;
+}
+.analytics-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #fff; }
+.big-number { font-size: 28px; font-weight: 800; color: #fff; }
+.big-number .unit { font-size: 13px; color: var(--dy-subtext); font-weight: 400; }
+.trend-row { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 12px; }
+.trend-up { color: var(--dy-green); }
+.trend-down { color: var(--dy-primary); }
+
+/* 大折线图 */
+.chart-area { height: 140px; position: relative; margin-top: 10px; }
+.chart-svg { width: 100%; height: 100%; }
+
+/* 粉丝画像 */
+.audience-bars { display: flex; flex-direction: column; gap: 8px; }
+.aud-row { display: flex; align-items: center; gap: 8px; }
+.aud-label { width: 45px; font-size: 11px; color: var(--dy-subtext); }
+.aud-bar-track { flex: 1; height: 6px; background: var(--dy-dark-3); border-radius: 3px; overflow: hidden; }
+.aud-bar-fill { height: 100%; border-radius: 3px; transition: width 1s; }
+.aud-pct { width: 36px; font-size: 11px; text-align: right; color: #fff; }
+
+/* ========== 消息页 ========== */
+.msg-list { max-width: 600px; margin: 0 auto; }
+.msg-item {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+  border-bottom: 1px solid var(--dy-border); cursor: pointer; transition: background .2s;
+}
+.msg-item:hover { background: var(--dy-card); }
+.msg-avatar {
+  width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0; background: var(--dy-card);
+}
+.msg-body { flex: 1; min-width: 0; }
+.msg-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px; }
+.msg-name { font-size: 14px; font-weight: 600; color: #fff; }
+.msg-time { font-size: 11px; color: var(--dy-gray-2); }
+.msg-preview { font-size: 12px; color: var(--dy-subtext); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.msg-badge { width: 8px; height: 8px; border-radius: 50%; background: var(--dy-primary); flex-shrink: 0; }
+
+/* ========== 设置页 ========== */
+.settings-panel { max-width: 600px; margin: 0 auto; }
+.settings-group { margin-bottom: 20px; }
+.settings-group-title { font-size: 12px; color: var(--dy-subtext); margin-bottom: 6px; padding-left: 4px; }
+.settings-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px; background: var(--dy-card); border: 1px solid var(--dy-border);
+  border-radius: 10px; margin-bottom: 6px; cursor: pointer;
+}
+.settings-item:hover { background: var(--dy-dark-3); }
+.settings-item-left { display: flex; align-items: center; gap: 10px; }
+.settings-icon { font-size: 18px; width: 28px; text-align: center; }
+.settings-label { font-size: 14px; color: #fff; }
+.settings-value { font-size: 12px; color: var(--dy-subtext); }
+.toggle-switch {
+  width: 42px; height: 24px; border-radius: 12px; background: var(--dy-gray-2);
+  position: relative; cursor: pointer; transition: background .2s;
+}
+.toggle-switch.on { background: var(--dy-primary); }
+.toggle-knob {
+  width: 20px; height: 20px; border-radius: 50%; background: #fff;
+  position: absolute; top: 2px; left: 2px; transition: transform .2s;
+}
+.toggle-switch.on .toggle-knob { transform: translateX(18px); }
+
+/* ========== 事件弹窗（已禁用，保留样式防止报错） ========== */
+.event-modal-overlay { display: none; }
+
+/* ========== Toast ========== */
+.toast-container {
+  position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+  z-index: 6000; display: flex; flex-direction: column; gap: 8px; align-items: center;
+}
+.toast {
+  padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600;
+  animation: toastIn .3s ease, toastOut .3s ease 2.7s forwards;
+  box-shadow: 0 4px 16px rgba(0,0,0,.3);
+}
+.toast.fan { background: rgba(255,44,85,.2); color: var(--dy-primary); border: 1px solid rgba(255,44,85,.3); }
+.toast.gold { background: rgba(255,215,0,.15); color: var(--dy-gold); border: 1px solid rgba(255,215,0,.3); }
+.toast.info { background: rgba(59,130,246,.15); color: var(--dy-blue); border: 1px solid rgba(59,130,246,.3); }
+.toast.green { background: rgba(0,212,170,.15); color: var(--dy-green); border: 1px solid rgba(0,212,170,.3); }
+@keyframes toastIn { from{opacity:0;transform:translateY(-10px)} to{opacity:1;transform:translateY(0)} }
+@keyframes toastOut { from{opacity:1} to{opacity:0;transform:translateY(-10px)} }
+
+/* ========== 成就通知 ========== */
+.achievement-pop {
+  position: fixed; bottom: 100px; right: 24px; z-index: 5500;
+  display: flex; align-items: center; gap: 12px;
+  background: linear-gradient(135deg, rgba(255,215,0,.15), rgba(255,44,85,.1));
+  border: 1px solid rgba(255,215,0,.3); border-radius: 14px;
+  padding: 14px 20px; animation: achieveSlide .5s ease;
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+}
+@keyframes achieveSlide { from{opacity:0;transform:translateX(60px)} to{opacity:1;transform:translateX(0)} }
+.ach-icon { font-size: 32px; }
+.ach-text { }
+.ach-title { font-size: 13px; color: var(--dy-gold); font-weight: 600; }
+.ach-name { font-size: 16px; font-weight: 700; }
+
+/* ========== 底部 Tab Bar（移动端，仿抖音） ========== */
+.bottom-tabbar {
+  display: none; position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  background: var(--dy-dark-2); border-top: 1px solid var(--dy-border);
+  padding: 6px 0; padding-bottom: calc(6px + env(safe-area-inset-bottom));
+}
+.tabbar-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 1px;
+  font-size: 10px; color: var(--dy-subtext); cursor: pointer;
+}
+.tabbar-item.active { color: var(--dy-primary); }
+.tabbar-icon { font-size: 20px; }
+
+/* ========== 页面切换 ========== */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ========== 创作者等级 ========== */
+.level-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: linear-gradient(135deg, var(--dy-gold), #ff8c00);
+  padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 700;
+  color: #000; margin-left: 6px;
+}
+.exp-bar-track { width: 100%; height: 4px; background: var(--dy-dark-3); border-radius: 2px; margin-top: 6px; overflow: hidden; }
+.exp-bar-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--dy-primary), var(--dy-gold)); transition: width .8s; }
+
+/* ========== 合作/品牌页 ========== */
+.brand-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px; background: var(--dy-card); border: 1px solid var(--dy-border);
+  border-radius: 10px; margin-bottom: 8px;
+}
+.brand-logo {
+  width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+}
+.brand-info { flex: 1; }
+.brand-name { font-size: 14px; font-weight: 600; color: #fff; }
+.brand-desc { font-size: 11px; color: var(--dy-subtext); margin-top: 3px; }
+.brand-status {
+  font-size: 11px; padding: 3px 10px; border-radius: 6px; font-weight: 600;
+}
+.status-active { background: rgba(0,212,170,.15); color: var(--dy-green); }
+.status-pending { background: rgba(255,140,0,.15); color: var(--dy-orange); }
+.status-ended { background: var(--dy-dark-3); color: var(--dy-subtext); }
+
+/* ========== 封禁样式 ========== */
+.banned-works {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 80px 20px; color: var(--dy-subtext); text-align: center;
+}
+.banned-works .banned-icon {
+  font-size: 72px; margin-bottom: 20px;
+  animation: bannedPulse 2s infinite;
+}
+.banned-works .banned-text {
+  font-size: 22px; font-weight: 800; color: var(--dy-primary);
+  margin-bottom: 10px;
+}
+.banned-works .banned-sub {
+  font-size: 14px; color: var(--dy-gray); margin-bottom: 6px;
+}
+.banned-works .banned-countdown {
+  font-size: 36px; font-weight: 900; color: var(--dy-gold);
+  margin: 16px 0; font-family: 'Courier New', monospace;
+  text-shadow: 0 0 20px rgba(255,215,0,0.3);
+}
+.banned-works .banned-progress {
+  width: 200px; height: 6px; background: var(--dy-dark-3);
+  border-radius: 3px; overflow: hidden; margin-top: 10px;
+}
+.banned-works .banned-progress-bar {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--dy-primary), var(--dy-gold));
+  transition: width 1s linear;
+}
+@keyframes bannedPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.95); }
+}
+/* 封禁时头像变灰 */
+.account-banned .profile-avatar {
+  filter: grayscale(1) opacity(0.4);
+}
+.account-banned .profile-name {
+  color: var(--dy-subtext) !important;
+}
+/* 经验条区域 */
+.exp-section {
+  padding: 0 16px 16px;
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .bottom-tabbar { display: flex; }
+  .main-content { padding-bottom: 70px; }
+  .data-cards { grid-template-columns: repeat(2, 1fr); }
+  .works-grid { grid-template-columns: repeat(2, 1fr); }
+  .analytics-grid { grid-template-columns: 1fr; }
+  .top-stats { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===================== 注册流程 ===================== -->
+<div class="register-overlay" id="registerOverlay">
+  <div class="register-card">
+    <h1 id="regTitle">🎵 创作者中心</h1>
+    <p class="subtitle" id="regSubtitle">开启你的创作之旅</p>
+
+    <!-- Step 1: 选头像 -->
+    <div class="step active" id="step1">
+      <div class="step-title">选择你的头像</div>
+      <div class="avatar-grid" id="avatarGrid"></div>
+      <button class="btn-primary" id="btnNext1" disabled>下一步</button>
+      <div class="step-dots"><div class="step-dot active"></div><div class="step-dot"></div><div class="step-dot"></div></div>
+    </div>
+
+    <!-- Step 2: 起名字 -->
+    <div class="step" id="step2">
+      <div class="step-title">设置你的昵称</div>
+      <input class="field-input" id="nameInput" placeholder="输入昵称（2-12个字符）" maxlength="12">
+      <input class="field-input" id="bioInput" placeholder="个人简介（选填）" maxlength="40">
+      <button class="btn-primary" id="btnNext2" disabled>下一步</button>
+      <button class="btn-secondary" id="btnBack2">返回</button>
+      <div class="step-dots"><div class="step-dot"></div><div class="step-dot active"></div><div class="step-dot"></div></div>
+    </div>
+
+    <!-- Step 3: 选领域 -->
+    <div class="step" id="step3">
+      <div class="step-title">选择创作领域</div>
+      <div class="niche-list" id="nicheList"></div>
+      <button class="btn-primary" id="btnRegister" disabled>🚀 开始创作</button>
+      <button class="btn-secondary" id="btnBack3">返回</button>
+      <div class="step-dots"><div class="step-dot"></div><div class="step-dot"></div><div class="step-dot active"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 主应用 ===================== -->
+<div class="app-container hidden" id="appContainer">
+  <!-- 左侧导航 -->
+  <div class="sidebar">
+    <div class="sidebar-logo">🎵</div>
+    <div class="sidebar-item active" data-page="me" title="我">
+      👤<span class="tooltip">我</span>
+    </div>
+    <div class="sidebar-item" data-page="messages" title="消息">
+      💬<span class="tooltip">消息</span>
+    </div>
+    <div class="sidebar-item" data-page="events" title="事件">
+      🎲<span class="tooltip">事件</span>
+    </div>
+    <div class="sidebar-item" data-page="timeline" title="时间线">
+      📜<span class="tooltip">时间线</span>
+    </div>
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-avatar" id="sidebarAvatar"></div>
+  </div>
+
+  <!-- 主内容 -->
+  <div class="main-content">
+    <!-- 警告横幅（封禁时显示） -->
+    <div class="warning-banner" id="warningBanner">🚫 该账号已被封禁，剩余封禁时间：<span id="banCountdown">--</span></div>
+
+    <!-- ========== 「我」页面（仿抖音个人主页） ========== -->
+    <div class="page active" id="page-me">
+      <!-- 背景横幅 -->
+      <div class="profile-banner" id="profileBanner"></div>
+
+      <!-- 用户信息区 -->
+      <div class="profile-info">
+        <div class="profile-avatar" id="profileAvatar"></div>
+        <div class="profile-main">
+          <div class="profile-name-row">
+            <span class="profile-name" id="profileName"></span>
+            <span class="profile-verify" id="profileVerify">✓</span>
+            <span class="level-badge" id="levelBadge">Lv.1 新手</span>
+          </div>
+          <div class="profile-handle" id="profileHandle"></div>
+          <div class="profile-bio" id="profileBio"></div>
+          <div class="profile-uid" id="profileUID"></div>
+        </div>
+      </div>
+
+      <!-- 数据行（获赞/互关/关注/粉丝） -->
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <span class="profile-stat-num" id="topLikes">0</span>
+          <div class="profile-stat-label">获赞</div>
+        </div>
+        <div class="profile-stat">
+          <span class="profile-stat-num" id="topMutual">0</span>
+          <div class="profile-stat-label">互关</div>
+        </div>
+        <div class="profile-stat">
+          <span class="profile-stat-num" id="topFollow">0</span>
+          <div class="profile-stat-label">关注</div>
+        </div>
+        <div class="profile-stat">
+          <span class="profile-stat-num" id="topFans">0</span>
+          <div class="profile-stat-label">粉丝</div>
+        </div>
+      </div>
+
+      <!-- 功能入口横幅（仿抖音订单/钱包/创作等） -->
+      <div class="feature-banner">
+        <div class="feature-item"><div class="feature-icon pink">📋</div>订单</div>
+        <div class="feature-item"><div class="feature-icon gold">👛</div>钱包</div>
+        <div class="feature-item"><div class="feature-icon blue">🎬</div>创作</div>
+        <div class="feature-item"><div class="feature-icon green">📊</div>数据</div>
+        <div class="feature-item"><div class="feature-icon purple">🤝</div>合作</div>
+        <div class="feature-item"><div class="feature-icon pink">⚙️</div>设置</div>
+      </div>
+
+      <!-- 经验条 -->
+      <div class="exp-section">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <span style="font-size:13px;font-weight:600;color:#fff;" id="expLabel">创作者经验</span>
+          <span style="font-size:11px;color:var(--dy-subtext);" id="expText">0 / 100</span>
+        </div>
+        <div class="exp-bar-track"><div class="exp-bar-fill" id="expFill" style="width:0%"></div></div>
+      </div>
+
+      <!-- 作品区 -->
+      <div class="works-section">
+        <div class="works-section-header">
+          <div class="works-tab active">🎬 作品 <span id="workCountInline">0</span></div>
+          <div class="works-count-badge" id="workCount">0 个作品</div>
+        </div>
+        <!-- 正常作品网格 -->
+        <div class="works-grid" id="worksGrid"></div>
+        <!-- 封禁提示（默认隐藏） -->
+        <div class="banned-works" id="bannedWorks" style="display:none;">
+          <div class="banned-icon">🚫</div>
+          <div class="banned-text">该账号已被封禁</div>
+          <div class="banned-sub">解封后作品将恢复显示</div>
+          <div class="banned-countdown" id="bannedCountdownBig">-- 天</div>
+          <div class="banned-sub" id="bannedCountdownDetail">剩余 -- 天 -- 小时</div>
+          <div class="banned-progress"><div class="banned-progress-bar" id="bannedProgressBar" style="width:0%;"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 消息页 ========== -->
+    <div class="page" id="page-messages">
+      <div class="dashboard-section">
+        <div class="section-header">
+          <div class="section-title">💬 消息通知</div>
+          <div class="section-more" id="msgUnread">0 条未读</div>
+        </div>
+        <div class="msg-list" id="msgList"></div>
+      </div>
+    </div>
+
+    <!-- ========== 事件页（数据看板+事件流） ========== -->
+    <div class="page" id="page-events">
+      <div class="dashboard-section">
+        <div class="section-header">
+          <div class="section-title">📈 数据总览</div>
+          <div class="section-more" id="refreshHint">每3秒自动更新</div>
+        </div>
+        <div class="data-cards">
+          <div class="data-card fans">
+            <div class="data-label">👥 粉丝数</div>
+            <div class="data-value" id="cardFans">0</div>
+            <div class="data-change up" id="cardFansChange">+0 今日</div>
+            <div class="mini-chart" id="fansChart"></div>
+          </div>
+          <div class="data-card likes">
+            <div class="data-label">❤️ 获赞数</div>
+            <div class="data-value" id="cardLikes">0</div>
+            <div class="data-change up" id="cardLikesChange">+0 今日</div>
+            <div class="mini-chart" id="likesChart"></div>
+          </div>
+          <div class="data-card views">
+            <div class="data-label">👁️ 总播放</div>
+            <div class="data-value" id="cardViews">0</div>
+            <div class="data-change up" id="cardViewsChange">+0 今日</div>
+            <div class="mini-chart" id="viewsChart"></div>
+          </div>
+          <div class="data-card works">
+            <div class="data-label">🎬 作品数</div>
+            <div class="data-value" id="cardWorks">0</div>
+            <div class="data-change up" id="cardWorksChange">+0 今日</div>
+            <div class="mini-chart" id="worksChart"></div>
+          </div>
+        </div>
+
+        <!-- 事件流 -->
+        <div class="event-feed-inline">
+          <div class="section-header">
+            <div class="section-title">🎲 事件流</div>
+            <div class="section-more" id="eventCount">0 条事件</div>
+          </div>
+          <div id="eventList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 时间线页（数据分析+合作+设置合并） ========== -->
+    <div class="page" id="page-timeline">
+      <div class="dashboard-section">
+        <div class="section-header">
+          <div class="section-title">📊 数据分析</div>
+          <div class="section-more">近7天</div>
+        </div>
+        <div class="analytics-grid">
+          <div class="analytics-card">
+            <h3>播放趋势</h3>
+            <div class="big-number" id="anaViews">0 <span class="unit">次播放</span></div>
+            <div class="trend-row"><span class="trend-up">↑ <span id="anaViewsTrend">0%</span></span><span style="color:var(--dy-gray);font-size:12px;">较上周</span></div>
+            <div class="chart-area"><svg class="chart-svg" id="trendChart" viewBox="0 0 300 120" preserveAspectRatio="none"></svg></div>
+          </div>
+          <div class="analytics-card">
+            <h3>互动数据</h3>
+            <div class="big-number" id="anaLikes">0 <span class="unit">点赞</span></div>
+            <div class="trend-row"><span class="trend-up">↑ <span id="anaLikesTrend">0%</span></span><span style="color:var(--dy-gray);font-size:12px;">较上周</span></div>
+            <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+              <div style="background:var(--dy-dark-3);border-radius:8px;padding:8px 12px;text-align:center;">
+                <div style="font-size:18px;font-weight:700;color:var(--dy-gold);" id="anaComments">0</div>
+                <div style="font-size:11px;color:var(--dy-gray);">评论</div>
+              </div>
+              <div style="background:var(--dy-dark-3);border-radius:8px;padding:8px 12px;text-align:center;">
+                <div style="font-size:18px;font-weight:700;color:var(--dy-blue);" id="anaShares">0</div>
+                <div style="font-size:11px;color:var(--dy-gray);">分享</div>
+              </div>
+              <div style="background:var(--dy-dark-3);border-radius:8px;padding:8px 12px;text-align:center;">
+                <div style="font-size:18px;font-weight:700;color:var(--dy-primary);" id="anaSaves">0</div>
+                <div style="font-size:11px;color:var(--dy-gray);">收藏</div>
+              </div>
+            </div>
+          </div>
+          <div class="analytics-card">
+            <h3>粉丝画像</h3>
+            <div class="audience-bars" id="audienceBars"></div>
+          </div>
+          <div class="analytics-card">
+            <h3>热门作品 TOP3</h3>
+            <div id="topWorks" style="display:flex;flex-direction:column;gap:10px;"></div>
+          </div>
+        </div>
+
+        <!-- 合作区 -->
+        <div class="section-header" style="margin-top:20px;">
+          <div class="section-title">🤝 商务合作</div>
+          <div class="section-more" id="collabCount">0 个合作</div>
+        </div>
+        <div id="collabList"></div>
+
+        <!-- 设置区 -->
+        <div class="section-header" style="margin-top:20px;">
+          <div class="section-title">⚙️ 设置</div>
+        </div>
+        <div class="settings-panel">
+          <div class="settings-group">
+            <div class="settings-group-title">账号信息</div>
+            <div class="settings-item">
+              <div class="settings-item-left"><div class="settings-icon">👤</div><div><div class="settings-label" id="setName">-</div><div style="font-size:12px;color:var(--dy-gray);" id="setBio">-</div></div></div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-left"><div class="settings-icon">🏷️</div><div><div class="settings-label">创作领域</div></div></div>
+              <div class="settings-value" id="setNiche">-</div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-left"><div class="settings-icon">🆔</div><div><div class="settings-label">UID</div></div></div>
+              <div class="settings-value" id="setUID">-</div>
+            </div>
+          </div>
+          <div class="settings-group">
+            <div class="settings-group-title">模拟设置</div>
+            <div class="settings-item">
+              <div class="settings-item-left"><div class="settings-icon">⚡</div><div><div class="settings-label">事件触发速度</div></div></div>
+              <div class="settings-value" id="setSpeed">正常 (3s)</div>
+            </div>
+            <div class="settings-item" id="btnSpeed">
+              <div class="settings-item-left"><div class="settings-icon">🎚️</div><div><div class="settings-label">切换速度</div></div></div>
+              <div class="settings-value">点击切换</div>
+            </div>
+            <div class="settings-item" id="btnTogglePause">
+              <div class="settings-item-left"><div class="settings-icon">⏸️</div><div><div class="settings-label">暂停/继续</div></div></div>
+              <div class="toggle-switch" id="pauseToggle"></div>
+            </div>
+          </div>
+          <div class="settings-group">
+            <div class="settings-group-title">危险操作</div>
+            <div class="settings-item" id="btnReset" style="border-color:rgba(255,44,85,.3);">
+              <div class="settings-item-left"><div class="settings-icon">🗑️</div><div><div class="settings-label" style="color:var(--dy-primary);">重置账号</div></div></div>
+              <div class="settings-value">清空所有数据</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 底部 Tab Bar（移动端） -->
+<div class="bottom-tabbar" id="bottomTabbar">
+  <div class="tabbar-item active" data-page="me"><div class="tabbar-icon">👤</div>我</div>
+  <div class="tabbar-item" data-page="messages"><div class="tabbar-icon">💬</div>消息</div>
+  <div class="tabbar-item" data-page="events"><div class="tabbar-icon">🎲</div>事件</div>
+  <div class="tabbar-item" data-page="timeline"><div class="tabbar-icon">📜</div>时间线</div>
+</div>
+
+<!-- Toast 容器 -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- 事件弹窗已移除（无弹窗模式） -->
+
+<script>
+// ===================== 数据模型 =====================
+const state = {
+  user: {
+    avatar: '', name: '', bio: '', niche: '', nicheData: null,
+    uid: '', registeredAt: 0
+  },
+  stats: {
+    fans: 0, follow: 0, likes: 0, views: 0, works: 0,
+    comments: 0, shares: 0, saves: 0,
+    exp: 0, level: 1,
+    todayFans: 0, todayLikes: 0, todayViews: 0, todayWorks: 0,
+  },
+  history: {
+    fans: [0,0,0,0,0,0,0], likes: [0,0,0,0,0,0,0],
+    views: [0,0,0,0,0,0,0], works: [0,0,0,0,0,0,0],
+  },
+  events: [], // 事件历史
+  works: [],  // 作品列表
+  messages: [], // 消息
+  collabs: [], // 合作
+  achievements: [], // 已解锁成就
+  day: 1,
+  usedEventIds: new Set(),
+  eventCounter: 0,
+  speedIndex: 1, // 0=快 1=正常 2=慢
+  speeds: [1500, 3000, 6000],
+  speedLabels: ['极速 (1.5s)', '正常 (3s)', '慢速 (6s)'],
+  paused: false,
+  lastEventTime: 0,
+};
+
+// ===================== 领域配置 =====================
+const NICHES = {
+  tech:     { name:'科技数码', icon:'💻', color:'#3b82f6', topics:['手机评测','电脑装机','AI工具','数码好物','软件教程'] },
+  food:     { name:'美食探店', icon:'🍜', color:'#ff6b35', topics:['探店vlog','家常菜谱','零食测评','夜市美食','厨房技巧'] },
+  gaming:   { name:'游戏电竞', icon:'🎮', color:'#a855f7', topics:['游戏实况','攻略教学','电竞比赛','怀旧游戏','新游评测'] },
+  lifestyle:{ name:'生活日常', icon:'🌿', color:'#00d4aa', topics:['日常vlog','好物分享','生活技巧','收纳整理','租房改造'] },
+  knowledge:{ name:'知识科普', icon:'🧠', color:'#ffd700', topics:['冷知识','历史故事','科学实验','心理学','经济常识'] },
+  comedy:   { name:'搞笑娱乐', icon:'😂', color:'#ff2c55', topics:['段子合集','搞笑配音','情景喜剧','模仿秀','沙雕日常'] },
+  travel:   { name:'旅行探险', icon:'✈️', color:'#06b6d4', topics:['旅行vlog','小众景点','美食地图','自驾游','露营装备'] },
+  beauty:   { name:'美妆时尚', icon:'💄', color:'#ec4899', topics:['妆容教程','护肤心得','穿搭分享','好物推荐','发型设计'] },
+};
+
+// ===================== 头像池 =====================
+const AVATARS = ['🐱','🐶','🦊','🐼','🦁','🐯','🐸','🐵','🦄','🐺','🦋','🌸','🌊','🔥','⭐','🎵','🎮','📷','🚀','🎨'];
+
+// ===================== 事件库（AI式随机生成） =====================
+function buildEventPool() {
+  const n = state.user.nicheData || NICHES.tech;
+  const topic = (i) => n.topics[i % n.topics.length];
+
+  return [
+    // ===== 正面大事件 (权重高) =====
+    { id:'viral_hit', type:'positive', icon:'🔥', title:'作品爆了！',
+      desc:()=>`你的《${topic(0)}》视频登上热门，播放量一夜暴涨！`,
+      impact:()=>({fans:r(500,3000),likes:r(2000,15000),views:r(10000,100000),works:0}),
+      weight:3 },
+    { id:'brand_deal', type:'positive', icon:'💰', title:'品牌找上门',
+      desc:()=>`某知名品牌看中你的影响力，邀请合作推广《${topic(1)}》相关内容。`,
+      impact:()=>({fans:r(200,800),likes:r(100,500),views:r(5000,20000),exp:r(50,150)}),
+      weight:2 },
+    { id:'big_v_share', type:'positive', icon:'🌟', title:'大V转发',
+      desc:()=>`某百万粉大V转发了你的视频，评论区炸了。`,
+      impact:()=>({fans:r(800,5000),likes:r(1000,8000),views:r(20000,80000)}),
+      weight:2 },
+    { id:'trending_topic', type:'positive', icon:'📈', title:'上了热搜',
+      desc:()=>`你参与的话题#${topic(2)}#冲上热搜榜第${r(3,20)}名！`,
+      impact:()=>({fans:r(1000,6000),likes:r(3000,20000),views:r(50000,200000)}),
+      weight:2 },
+    { id:'official_feature', type:'positive', icon:'🏅', title:'官方推荐',
+      desc:()=>`平台官方编辑将你的作品推荐到首页「${topic(3)}」频道。`,
+      impact:()=>({fans:r(300,2000),likes:r(500,3000),views:r(10000,50000),exp:r(30,80)}),
+      weight:2 },
+    { id:'fan_milestone', type:'positive', icon:'🎊', title:'粉丝里程碑',
+      desc:()=>`粉丝数突破 ${formatNum(state.stats.fans)}！粉丝团人数激增。`,
+      impact:()=>({fans:r(100,500),likes:r(200,1000),exp:r(20,50)}),
+      weight:1 },
+    { id:'media_interview', type:'positive', icon:'🎤', title:'媒体采访',
+      desc:()=>`某知名媒体联系你，想做一期关于「${topic(4)}」的专题采访。`,
+      impact:()=>({fans:r(500,2000),likes:r(300,1500),views:r(10000,40000),exp:r(50,100)}),
+      weight:1 },
+    { id:'award_nominate', type:'positive', icon:'🏆', title:'奖项提名',
+      desc:()=>`你被提名为「年度${n.name}创作者」，粉丝纷纷投票支持。`,
+      impact:()=>({fans:r(400,1500),likes:r(500,2000),exp:r(40,80)}),
+      weight:1 },
+    { id:'collab_video', type:'positive', icon:'🤝', title:'联动合作',
+      desc:()=>`你和另一位${n.name}博主联合拍摄了《${topic(0)}》合作作品。`,
+      impact:()=>({fans:r(300,1200),likes:r(500,3000),views:r(10000,50000),works:1}),
+      weight:2 },
+    { id:'algorithm_boost', type:'positive', icon:'📊', title:'算法推荐',
+      desc:()=>`平台调整算法，你的内容被推送给更多兴趣用户。`,
+      impact:()=>({fans:r(200,1000),likes:r(300,2000),views:r(5000,30000)}),
+      weight:2 },
+    { id:'fan_meet', type:'positive', icon:'💕', title:'粉丝见面会',
+      desc:()=>`你举办了一场线上粉丝见面会，直播间人气爆棚。`,
+      impact:()=>({fans:r(100,600),likes:r(500,3000),views:r(5000,20000),exp:r(20,60)}),
+      weight:1 },
+    { id:'series_popular', type:'positive', icon:'📚', title:'系列受欢迎',
+      desc:()=>`你的《${topic(1)}》系列被大量追更，评论区催更声一片。`,
+      impact:()=>({fans:r(200,800),likes:r(500,2500),views:r(8000,30000)}),
+      weight:2 },
+    { id:'platform_bonus', type:'positive', icon:'🎁', title:'平台激励',
+      desc:()=>`你获得了平台「创作者激励计划」的额外流量扶持。`,
+      impact:()=>({fans:r(100,500),likes:r(200,1000),views:r(5000,20000),exp:r(10,40)}),
+      weight:2 },
+    { id:'mentor_invite', type:'positive', icon:'🎓', title:'导师邀请',
+      desc:()=>`平台邀请你成为新人创作者的导师，分享${topic(2)}经验。`,
+      impact:()=>({fans:r(100,400),likes:r(100,500),exp:r(30,60)}),
+      weight:1 },
+
+    // ===== 中性/日常事件 =====
+    { id:'daily_upload', type:'neutral', icon:'📹', title:'日常更新',
+      desc:()=>`你发布了一条关于《${topic(r(0,4))}》的新视频。`,
+      impact:()=>({fans:r(-10,50),likes:r(10,200),views:r(100,2000),works:1}),
+      weight:4 },
+    { id:'inspiration', type:'neutral', icon:'💡', title:'灵感爆发',
+      desc:()=>`你突然有了新点子，准备拍一系列《${topic(r(0,4))}》的创意视频。`,
+      impact:()=>({exp:r(5,15)}),
+      weight:3 },
+    { id:'equipment_up', type:'neutral', icon:'🎧', title:'设备升级',
+      desc:()=>`你入手了一套新的拍摄设备，画质提升明显。`,
+      impact:()=>({exp:r(5,20)}),
+      weight:2 },
+    { id:'data_review', type:'neutral', icon:'🔍', title:'数据分析',
+      desc:()=>`你复盘了近期数据，发现《${topic(r(0,4))}》类内容表现最好。`,
+      impact:()=>({exp:r(3,10)}),
+      weight:3 },
+    { id:'comment_reply', type:'neutral', icon:'💬', title:'粉丝互动',
+      desc:()=>`你花时间回复了评论区，粉丝好感度上升。`,
+      impact:()=>({fans:r(5,30),likes:r(10,50),exp:r(2,8)}),
+      weight:3 },
+    { id:'trend_research', type:'neutral', icon:'📱', title:'追热点',
+      desc:()=>`你花了一整天研究最近的热门趋势，准备蹭一波流量。`,
+      impact:()=>({exp:r(5,15)}),
+      weight:2 },
+    { id:'script_writing', type:'neutral', icon:'✍️', title:'写脚本',
+      desc:()=>`你认真打磨了下一个视频的脚本，质量比之前提升不少。`,
+      impact:()=>({exp:r(5,15)}),
+      weight:3 },
+    { id:'editing_skill', type:'neutral', icon:'🎬', title:'剪辑精进',
+      desc:()=>`你学会了一个新的剪辑技巧，视频节奏感明显提升。`,
+      impact:()=>({exp:r(3,10)}),
+      weight:2 },
+    { id:'night_owl', type:'neutral', icon:'🦉', title:'熬夜创作',
+      desc:()=>`你又熬到凌晨剪视频，虽然累但很有成就感。`,
+      impact:()=>({exp:r(2,8),fans:r(-5,10)}),
+      weight:2 },
+    { id:'community_event', type:'neutral', icon:'🎪', title:'平台活动',
+      desc:()=>`平台举办「${n.name}创作大赛」，你报名参加了。`,
+      impact:()=>({exp:r(5,15)}),
+      weight:2 },
+
+    // ===== 负面事件 =====
+    { id:'algorithm_drop', type:'negative', icon:'📉', title:'流量下降',
+      desc:()=>`平台算法调整，你的视频推荐量突然骤降。`,
+      impact:()=>({fans:r(-100,-10),likes:r(-50,-5),views:r(-2000,-100)}),
+      weight:2 },
+    { id:'controversy', type:'negative', icon:'⚡', title:'引发争议',
+      desc:()=>`你的一条关于《${topic(r(0,4))}》的视频引发网友争论。`,
+      impact:()=>({fans:r(-200,50),likes:r(-100,100),views:r(1000,10000)}),
+      weight:2 },
+    { id:'burnout', type:'negative', icon:'😩', title:'创作瓶颈',
+      desc:()=>`你感觉灵感枯竭，对着镜头完全不知道说什么。`,
+      impact:()=>({fans:r(-20,5),exp:r(-5,0)}),
+      weight:2 },
+    { id:'negative_comment', type:'negative', icon:'💢', title:'恶意评论',
+      desc:()=>`评论区出现一批杠精，你的心情受到影响。`,
+      impact:()=>({fans:r(-30,-5),likes:r(-20,-2)}),
+      weight:2 },
+    { id:'shadow_ban', type:'negative', icon:'👻', title:'疑似限流',
+      desc:()=>`你怀疑自己的账号被限流了，播放量异常低。`,
+      impact:()=>({fans:r(-50,-5),views:r(-1000,-100)}),
+      weight:1 },
+    { id:'copyright_strike', type:'negative', icon:'⚠️', title:'版权警告',
+      desc:()=>`你的视频因背景音乐版权问题被系统标记。`,
+      impact:()=>({fans:r(-20,0),exp:r(-10,0)}),
+      weight:1 },
+    { id:'account_hack', type:'negative', icon:'🔓', title:'账号异常',
+      desc:()=>`系统检测到你的账号有异常登录，部分功能被临时限制。`,
+      impact:()=>({fans:r(-30,-5),views:r(-500,-50)}),
+      weight:1 },
+    { id:'bad_timing', type:'negative', icon:'🕐', title:'发布时间不对',
+      desc:()=>`你精心制作的视频因为发布时间不好，错过了流量高峰。`,
+      impact:()=>({fans:r(-15,5),likes:r(-30,10),views:r(-500,100)}),
+      weight:2 },
+    { id:'competitor_copy', type:'negative', icon:'🅰️', title:'创意被抄',
+      desc:()=>`有同行照搬了你的创意，还比你先发布。`,
+      impact:()=>({fans:r(-20,10),likes:r(-10,20)}),
+      weight:1 },
+    { id:'equipment_fail', type:'negative', icon:'🔧', title:'设备故障',
+      desc:()=>`拍摄时存储卡损坏，素材全部丢失，只能重拍。`,
+      impact:()=>({exp:r(-5,0),fans:r(-10,0)}),
+      weight:1 },
+
+    // ===== 极低概率灾难事件 =====
+    { id:'account_banned', type:'negative', icon:'🚫', title:'账号被封禁！',
+      desc:()=>`你的账号因违反社区规定被封禁，头像重置为默认，昵称显示为"TA"，作品全部隐藏，粉丝正在大量流失…`,
+      impact:()=>({fans:-Math.max(50, Math.round(state.stats.fans * r(5,20)/100)), likes:r(-50,-5), exp:r(-20,-5)}),
+      weight:0.5 }, // 约1%触发概率
+    { id:'mass_unfollow', type:'negative', icon:'💔', title:'大规模取关',
+      desc:()=>`一条负面言论引发连锁反应，大量粉丝集体取关，掉粉速度惊人！`,
+      impact:()=>({fans:-r(2000,50000), likes:r(-500,-50), views:r(-5000,-500)}),
+      weight:1 }, // 约2%触发概率
+
+    // ===== 稀有/传奇事件 =====
+    { id:'rare_tv_show', type:'legendary', icon:'📺', title:'上电视了！',
+      desc:()=>`某综艺节目引用了你的视频片段，全国观众都看到了！`,
+      impact:()=>({fans:r(3000,10000),likes:r(5000,30000),views:r(100000,500000),exp:r(100,300)}),
+      weight:1 },
+    { id:'rare_celebrity', type:'legendary', icon:'🎭', title:'明星关注',
+      desc:()=>`一位当红明星悄悄关注了你，粉丝们疯狂讨论。`,
+      impact:()=>({fans:r(2000,8000),likes:r(1000,5000),views:r(20000,100000),exp:r(80,200)}),
+      weight:1 },
+    { id:'rare_international', type:'legendary', icon:'🌍', title:'海外走红',
+      desc:()=>`你的视频被翻译传到海外，外国网友也在讨论《${topic(r(0,4))}》。`,
+      impact:()=>({fans:r(1000,5000),likes:r(2000,10000),views:r(50000,200000),exp:r(50,150)}),
+      weight:1 },
+    { id:'rare_record', type:'legendary', icon:'🎖️', title:'打破记录',
+      desc:()=>`你的单条视频播放量打破个人记录，评论区沸腾了！`,
+      impact:()=>({fans:r(1500,6000),likes:r(3000,15000),views:r(50000,200000),exp:r(60,180)}),
+      weight:1 },
+    { id:'rare_book_deal', type:'legendary', icon:'📖', title:'出书邀请',
+      desc:()=>`出版社联系你，希望把你的${n.name}内容整理成书出版。`,
+      impact:()=>({fans:r(500,2000),likes:r(200,1000),exp:r(50,120)}),
+      weight:1 },
+    { id:'rare_app_brand', type:'legendary', icon:'🏢', title:'平台签约',
+      desc:()=>`平台主动邀请你签约成为「独家创作者」，待遇优厚。`,
+      impact:()=>({fans:r(1000,5000),likes:r(500,3000),views:r(20000,100000),exp:r(100,250)}),
+      weight:1 },
+    { id:'rare_viral_song', type:'legendary', icon:'🎵', title:'神曲诞生',
+      desc:()=>`你用的BGM火了，连带你的视频一起被疯狂传播。`,
+      impact:()=>({fans:r(2000,8000),likes:r(5000,20000),views:r(100000,300000),exp:r(80,200)}),
+      weight:1 },
+    { id:'rare_muse', type:'legendary', icon:'🏛️', title:'博物馆收录',
+      desc:()=>`你的${n.name}视频被某数字博物馆收录为「网络文化档案」。`,
+      impact:()=>({fans:r(300,1000),likes:r(200,800),exp:r(50,100)}),
+      weight:1 },
+  ];
+}
+
+// ===================== 成就系统 =====================
+const ACHIEVEMENTS = [
+  { id:'first_100', name:'百粉达成', desc:'粉丝突破100人', check:s=>s.fans>=100, icon:'🥉' },
+  { id:'first_1k', name:'千粉达人', desc:'粉丝突破1,000人', check:s=>s.fans>=1000, icon:'🥈' },
+  { id:'first_10k', name:'万粉博主', desc:'粉丝突破10,000人', check:s=>s.fans>=10000, icon:'🥇' },
+  { id:'first_100k', name:'十万粉大V', desc:'粉丝突破100,000人', check:s=>s.fans>=100000, icon:'🏆' },
+  { id:'first_1m', name:'百万粉丝', desc:'粉丝突破1,000,000人', check:s=>s.fans>=1000000, icon:'👑' },
+  { id:'first_10m', name:'千万顶流', desc:'粉丝突破10,000,000人', check:s=>s.fans>=10000000, icon:'💎' },
+  { id:'likes_10k', name:'万人点赞', desc:'获赞突破10,000', check:s=>s.likes>=10000, icon:'❤️' },
+  { id:'likes_100k', name:'十万赞', desc:'获赞突破100,000', check:s=>s.likes>=100000, icon:'💖' },
+  { id:'views_1m', name:'百万播放', desc:'总播放突破1,000,000', check:s=>s.views>=1000000, icon:'👁️' },
+  { id:'works_10', name:'高产创作者', desc:'发布10个作品', check:s=>s.works>=10, icon:'🎬' },
+  { id:'works_50', name:'创作狂人', desc:'发布50个作品', check:s=>s.works>=50, icon:'🎞️' },
+  { id:'works_100', name:'百大创作者', desc:'发布100个作品', check:s=>s.works>=100, icon:'🏅' },
+  { id:'day_30', name:'坚持一月', desc:'连续创作30天', check:()=>state.day>=30, icon:'📅' },
+  { id:'day_100', name:'百日坚持', desc:'连续创作100天', check:()=>state.day>=100, icon:'🔥' },
+  { id:'viral_master', name:'爆款制造机', check:()=>state.events.filter(e=>e.id==='viral_hit').length>=5, icon:'💥' },
+  { id:'comeback', name:'浴火重生', desc:'在流量低谷后重新崛起', check:()=>state.stats.fans>=5000 && state.events.some(e=>e.id==='algorithm_drop'), icon:'🦋' },
+  { id:'exp_1k', name:'经验丰富', desc:'创作者经验达到1000', check:s=>s.exp>=1000, icon:'⭐' },
+  { id:'collab_5', name:'社交达人', desc:'完成5次合作', check:()=>state.collabs.filter(c=>c.status==='active').length>=5, icon:'🤝' },
+];
+
+// ===================== 工具函数 =====================
+function r(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function formatNum(n){
+  if(n>=100000000)return (n/100000000).toFixed(1)+'亿';
+  if(n>=10000)return (n/10000).toFixed(1)+'万';
+  return n.toString();
+}
+function formatTime(ts){
+  const d=new Date(ts);
+  return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
+}
+
+// ===================== 数字滚动动画 =====================
+const _animStates = {}; // 存储每个元素的当前动画
+function animateNumber(el, from, to, duration=1200, formatter=formatNum){
+  const key = el.id || Math.random().toString(36).slice(2);
+  // 如果同一个元素已有动画在跑，直接更新目标值，不重新开动画
+  if(_animStates[key]){
+    const st = _animStates[key];
+    st.to = to;
+    st.from = parseFloat(el.textContent.replace(/[^\d.-]/g,'')) || st.from;
+    return;
+  }
+  const startTime = performance.now();
+  const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+  const stateObj = { raf:0, from, to, startTime };
+  function frame(now){
+    const elapsed = now - stateObj.startTime;
+    const t = Math.min(1, elapsed / duration);
+    const eased = easeOut(t);
+    const current = Math.round(stateObj.from + (stateObj.to - stateObj.from) * eased);
+    el.textContent = formatter(current);
+    if(t < 1){
+      stateObj.raf = requestAnimationFrame(frame);
+    } else {
+      el.textContent = formatter(stateObj.to);
+      delete _animStates[key];
+    }
+  }
+  _animStates[key] = stateObj;
+  stateObj.raf = requestAnimationFrame(frame);
+}
+
+// ===================== 注册流程 =====================
+let regAvatar='', regName='', regNiche='';
+
+function initRegister(){
+  // 头像
+  const grid=document.getElementById('avatarGrid');
+  AVATARS.forEach(a=>{
+    const cell=document.createElement('div');
+    cell.className='avatar-cell';
+    cell.textContent=a;
+    cell.onclick=()=>{
+      document.querySelectorAll('.avatar-cell').forEach(c=>c.classList.remove('selected'));
+      cell.classList.add('selected');
+      regAvatar=a;
+      document.getElementById('btnNext1').disabled=false;
+    };
+    grid.appendChild(cell);
+  });
+  // 领域
+  const nlist=document.getElementById('nicheList');
+  Object.entries(NICHES).forEach(([key,val])=>{
+    const item=document.createElement('div');
+    item.className='niche-item';
+    item.innerHTML=`<div class="niche-icon">${val.icon}</div><div class="niche-info"><div class="niche-name">${val.name}</div><div class="niche-desc">${val.topics.join(' · ')}</div></div>`;
+    item.onclick=()=>{
+      document.querySelectorAll('.niche-item').forEach(c=>c.classList.remove('selected'));
+      item.classList.add('selected');
+      regNiche=key;
+      document.getElementById('btnRegister').disabled=false;
+    };
+    nlist.appendChild(item);
+  });
+  // 按钮
+  document.getElementById('btnNext1').onclick=()=>{
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('step2').classList.add('active');
+    document.getElementById('nameInput').focus();
+  };
+  document.getElementById('nameInput').oninput=()=>{
+    const v=document.getElementById('nameInput').value.trim();
+    document.getElementById('btnNext2').disabled=v.length<2;
+  };
+  document.getElementById('btnNext2').onclick=()=>{
+    regName=document.getElementById('nameInput').value.trim();
+    document.getElementById('step2').classList.remove('active');
+    document.getElementById('step3').classList.add('active');
+  };
+  document.getElementById('btnBack2').onclick=()=>{
+    document.getElementById('step2').classList.remove('active');
+    document.getElementById('step1').classList.add('active');
+  };
+  document.getElementById('btnBack3').onclick=()=>{
+    document.getElementById('step3').classList.remove('active');
+    document.getElementById('step2').classList.add('active');
+  };
+  document.getElementById('btnRegister').onclick=completeRegister;
+}
+
+function completeRegister(){
+  state.user.avatar=regAvatar;
+  state.user.name=regName;
+  state.user.bio=document.getElementById('bioInput').value.trim()||`一个热爱${NICHES[regNiche].name}的普通人`;
+  state.user.niche=regNiche;
+  state.user.nicheData=NICHES[regNiche];
+  state.user.uid='U' + Date.now().toString(36).toUpperCase().slice(-8);
+  state.user.registeredAt=Date.now();
+
+  // 初始数据
+  state.stats.fans=r(10,50);
+  state.stats.follow=r(5,20);
+  state.stats.likes=r(5,30);
+  state.stats.views=r(50,300);
+  state.stats.exp=r(10,50);
+  state.banned=false;
+  state.banDays=0;
+  state.banStartDay=0;
+  state.mutualRatio=r(60,90)/100;
+  // 同步动画缓存起始值
+  _lastRendered.fans=state.stats.fans;
+  _lastRendered.follow=state.stats.follow;
+  _lastRendered.likes=state.stats.likes;
+  _lastRendered.views=state.stats.views;
+  _lastRendered.works=state.stats.works;
+  _lastRendered.exp=state.stats.exp;
+  _lastRendered.comments=0;
+  _lastRendered.shares=0;
+  _lastRendered.saves=0;
+  _lastRendered.mutual=0;
+
+  // 隐藏注册页，显示主应用
+  document.getElementById('registerOverlay').classList.add('hidden');
+  document.getElementById('appContainer').classList.remove('hidden');
+
+  // 初始化UI
+  renderUserInfo();
+  generateInitialWorks(2);
+  startSimulation();
+  showToast('🎉 欢迎加入创作者大家庭！','gold');
+}
+
+// ===================== UI渲染 =====================
+function renderUserInfo(){
+  const u=state.user;
+  // 顶部头像（仿抖音个人主页）
+  const avatarEl=document.getElementById('profileAvatar');
+  avatarEl.textContent=u.avatar;
+  document.getElementById('profileName').textContent=u.name;
+  document.getElementById('profileHandle').textContent='@'+u.name.toLowerCase().replace(/\s/g,'_') + ' · ' + u.nicheData.name;
+  document.getElementById('profileBio').textContent=u.bio||'这个人很懒，什么都没写~';
+  document.getElementById('profileUID').textContent='UID: '+u.uid;
+  // 侧边栏头像
+  document.getElementById('sidebarAvatar').textContent=u.avatar;
+  // 设置页
+  document.getElementById('setName').textContent=u.name;
+  document.getElementById('setBio').textContent=u.bio;
+  document.getElementById('setNiche').textContent=u.nicheData.icon+' '+u.nicheData.name;
+  document.getElementById('setUID').textContent=u.uid;
+}
+
+// 存储上一次渲染的值，用于数字滚动动画的起始点
+const _lastRendered = { fans:0, follow:0, likes:0, works:0, views:0, exp:0, comments:0, shares:0, saves:0 };
+let _lastRenderDay = -1; // 用于节流迷你图重绘
+let _lastAnalyticsDay = -1;  // 用于节流折线图/画像重绘
+const _dirty = { events:false, messages:false, works:false, collabs:false }; // 列表刷新脏标记
+
+function renderTopBar(){
+  // 每帧直接更新，本身就是实时滚动效果
+  const fansEl=document.getElementById('topFans');
+  if(fansEl) fansEl.textContent = formatNum(Math.round(state.stats.fans));
+  const followEl=document.getElementById('topFollow');
+  if(followEl) followEl.textContent = formatNum(Math.round(state.stats.follow));
+  const likesEl=document.getElementById('topLikes');
+  if(likesEl) likesEl.textContent = formatNum(Math.round(state.stats.likes));
+  // 互关（基于关注数波动）
+  const mutual=Math.round(state.stats.follow*((state.mutualRatio)||(state.mutualRatio=r(60,90)/100)));
+  const mutualEl=document.getElementById('topMutual');
+  if(mutualEl) mutualEl.textContent = formatNum(mutual);
+  // 作品数（这个不常变，可以用动画）
+  const worksEl=document.getElementById('cardWorks');
+  if(worksEl && _lastRendered.works!==state.stats.works){
+    animateNumber(worksEl, _lastRendered.works, state.stats.works, 600);
+    _lastRendered.works=state.stats.works;
+  }
+
+  const dayEl=document.getElementById('dayCounter');
+  if(dayEl) dayEl.textContent='第 '+state.day+' 天';
+  // 等级
+  const lvl=calcLevel(state.stats.exp);
+  state.stats.level=lvl;
+  const lvlEl=document.getElementById('levelBadge');
+  if(lvlEl) lvlEl.textContent=`Lv.${lvl} ${levelName(lvl)}`;
+  // 经验（每帧直接更新）
+  const expEl=document.getElementById('expText');
+  if(expEl) expEl.textContent = Math.round(state.stats.exp) + ' / ' + expForLevel(lvl+1);
+  const expInLevel=state.stats.exp-expForLevel(lvl);
+  const expNeeded=expForLevel(lvl+1)-expForLevel(lvl);
+  const pct=Math.min(100,Math.round(expInLevel/expNeeded*100));
+  const expFill=document.getElementById('expFill');
+  if(expFill) expFill.style.width=pct+'%';
+
+  // 封禁时刷新用户信息显示
+  if(state.banned){
+    document.getElementById('profileAvatar').textContent='👤';
+    document.getElementById('profileName').textContent='TA';
+    updateBanCountdown();
+  } else {
+    document.getElementById('profileAvatar').textContent=state.user.avatar;
+    document.getElementById('profileName').textContent=state.user.name;
+  }
+}
+
+function calcLevel(exp){return Math.floor(Math.sqrt(exp/50))+1;}
+function expForLevel(l){return 50*(l-1)*(l-1);}
+function levelName(l){
+  const names=['新手创作者','入门博主','成长新星','潜力达人','知名博主','领域专家','头部创作者','顶级大V','现象级IP','传奇创作者'];
+  return names[Math.min(l-1,names.length-1)];
+}
+
+function renderDataCards(){
+  // 每帧调用，直接写值即可（本身就是实时变化）
+  const cf=document.getElementById('cardFans');
+  if(cf) cf.textContent = formatNum(Math.round(state.stats.fans));
+  const cl=document.getElementById('cardLikes');
+  if(cl) cl.textContent = formatNum(Math.round(state.stats.likes));
+  const cv=document.getElementById('cardViews');
+  if(cv) cv.textContent = formatNum(Math.round(state.stats.views));
+  const cw=document.getElementById('cardWorks');
+  if(cw && _lastRendered.works!==state.stats.works){
+    animateNumber(cw, _lastRendered.works, state.stats.works, 600);
+    _lastRendered.works=state.stats.works;
+  }
+  // 今日变化
+  setChangeEl('cardFansChange',Math.round(state.stats.todayFans));
+  setChangeEl('cardLikesChange',Math.round(state.stats.todayLikes));
+  setChangeEl('cardViewsChange',Math.round(state.stats.todayViews));
+  setChangeEl('cardWorksChange',state.stats.todayWorks);
+  // 迷你图（只在每天变化时重绘，避免每帧DOM操作）
+  if(state.day !== _lastRenderDay){
+    _lastRenderDay = state.day;
+    renderMiniChart('fansChart',state.history.fans,['#ff2c55','#ff6b81']);
+    renderMiniChart('likesChart',state.history.likes,['#ffd700','#ffe44d']);
+    renderMiniChart('viewsChart',state.history.views,['#3b82f6','#60a5fa']);
+    renderMiniChart('worksChart',state.history.works,['#00d4aa','#33e0bf']);
+  }
+}
+
+function setChangeEl(id,val){
+  const el=document.getElementById(id);
+  if(val>0){el.className='data-change up';el.textContent='↑ +'+formatNum(val)+' 今日';}
+  else if(val<0){el.className='data-change down';el.textContent='↓ '+formatNum(val)+' 今日';}
+  else{el.className='data-change';el.textContent='— 今日持平';}
+}
+
+function renderMiniChart(containerId,data,colors){
+  const c=document.getElementById(containerId);
+  c.innerHTML='';
+  const max=Math.max(...data,1);
+  const min=Math.min(...data,0);
+  const range=max-min||1;
+  data.forEach((v,i)=>{
+    const bar=document.createElement('div');
+    bar.className='mini-bar';
+    const h=Math.max(2,Math.round(((v-min)/range)*36+4));
+    bar.style.height=h+'px';
+    bar.style.background=colors[i===data.length-1?0:1];
+    c.appendChild(bar);
+  });
+}
+
+// ===================== 封禁倒计时 =====================
+function updateBanCountdown(){
+  if(!state.banned)return;
+  const daysPassed=state.day-state.banStartDay;
+  const remaining=Math.max(0,state.banDays-daysPassed);
+  // 顶部小倒计时
+  const el=document.getElementById('banCountdown');
+  if(el)el.textContent=remaining+' 天';
+  // 作品区大倒计时
+  const bigEl=document.getElementById('bannedCountdownBig');
+  if(bigEl)bigEl.textContent=remaining+' 天';
+  const detailEl=document.getElementById('bannedCountdownDetail');
+  if(detailEl){
+    // 用day进度模拟小时（更平滑）
+    const hoursInDay = Math.floor(((DAY_LENGTH_MS - _dayAccumulator)/DAY_LENGTH_MS)*24);
+    detailEl.textContent='剩余 '+remaining+' 天 '+hoursInDay+' 小时';
+  }
+  // 进度条
+  const progBar=document.getElementById('bannedProgressBar');
+  if(progBar){
+    const total=state.banDays||1;
+    const pct=Math.min(100,Math.round((daysPassed/total)*100));
+    progBar.style.width=pct+'%';
+  }
+}
+
+// ===================== 事件系统 =====================
+function getAvailableEvents(){
+  const pool=buildEventPool();
+  const fresh=pool.filter(e=>!state.usedEventIds.has(e.id));
+  if(fresh.length<5){
+    // 重置部分已用ID
+    const toFree=Array.from(state.usedEventIds).slice(0,Math.ceil(state.usedEventIds.size/2));
+    toFree.forEach(id=>state.usedEventIds.delete(id));
+    return pool.filter(e=>!state.usedEventIds.has(e.id));
+  }
+  return fresh;
+}
+
+function pickWeightedEvent(){
+  const avail=getAvailableEvents();
+  const totalWeight=avail.reduce((s,e)=>s+e.weight,0);
+  let rnd=Math.random()*totalWeight;
+  for(const e of avail){rnd-=e.weight;if(rnd<=0)return e;}
+  return avail[0];
+}
+
+// 封禁期专用事件池：只有掉粉/掉赞/掉播放，绝无正面事件，绝不再封号
+function pickBannedEvent(){
+  const bannedPool = [
+    { id:'ban_fans_drain', type:'negative', icon:'📉', title:'持续掉粉',
+      desc:()=>`封禁期间粉丝持续流失，每分每秒都在掉…`,
+      impact:()=>({fans:-Math.max(1,Math.round(state.stats.fans*(0.005+Math.random()*0.02))), likes:-r(1,20)}),
+      weight:5 },
+    { id:'ban_silence', type:'negative', icon:'🔇', title:'账号静默',
+      desc:()=>`封禁导致所有内容不可见，播放量归零。`,
+      impact:()=>({views:-r(100,5000)}),
+      weight:4 },
+    { id:'ban_unfollow', type:'negative', icon:'💔', title:'粉丝取关',
+      desc:()=>`又一批粉丝等不及解封，选择取关离开。`,
+      impact:()=>({fans:-Math.max(1,Math.round(state.stats.fans*(0.01+Math.random()*0.03)))}),
+      weight:4 },
+    { id:'ban_reports', type:'negative', icon:'📢', title:'负面舆论',
+      desc:()=>`封禁引发猜测，有人开始散布关于你的负面传言。`,
+      impact:()=>({fans:-r(5,50), likes:-r(10,100)}),
+      weight:3 },
+    { id:'ban_algo', type:'negative', icon:'🤖', title:'算法遗忘',
+      desc:()=>`长时间不更新，推荐算法开始遗忘你的账号。`,
+      impact:()=>({views:-r(500,5000), fans:-r(1,20)}),
+      weight:3 },
+  ];
+  const totalWeight=bannedPool.reduce((s,e)=>s+e.weight,0);
+  let rnd=Math.random()*totalWeight;
+  for(const e of bannedPool){rnd-=e.weight;if(rnd<=0)return e;}
+  return bannedPool[0];
+}
+
+function triggerEvent(){
+  if(state.paused)return;
+
+  // ===== 封禁期：走专用事件池，绝不触发封禁/正面事件 =====
+  let ev;
+  if(state.banned){
+    ev = pickBannedEvent(); // 只返回负面/流失类事件
+  } else {
+    ev = pickWeightedEvent();
+  }
+  state.usedEventIds.add(ev.id);
+  state.eventCounter++;
+
+  const desc=ev.desc();
+  const impact=ev.impact();
+  const fansBefore=state.stats.fans;
+
+  // ===== 封禁期：强制所有影响只降不涨 =====
+  let effectiveImpact = {...impact};
+  if(state.banned){
+    // 任何正向数据全部归零或反转
+    if(effectiveImpact.fans > 0) effectiveImpact.fans = -Math.round(effectiveImpact.fans * 0.5);
+    if(effectiveImpact.likes > 0) effectiveImpact.likes = -Math.round(effectiveImpact.likes * 0.3);
+    if(effectiveImpact.views > 0) effectiveImpact.views = -Math.round(effectiveImpact.views * 0.2);
+    if(effectiveImpact.exp > 0) effectiveImpact.exp = 0;
+    // 额外掉粉（逐数骤降）
+    const extraDrop = Math.max(1, Math.round(state.stats.fans * 0.01)) + r(1, 10);
+    effectiveImpact.fans = (effectiveImpact.fans || 0) - extraDrop;
+    // 封禁期间绝不产生新作品
+    effectiveImpact.works = 0;
+  }
+
+  const useImpact = state.banned ? effectiveImpact : impact;
+
+  // 应用影响
+  if(useImpact.fans){state.stats.fans=Math.max(0,state.stats.fans+useImpact.fans);state.stats.todayFans+=useImpact.fans;}
+  if(useImpact.likes){state.stats.likes=Math.max(0,state.stats.likes+useImpact.likes);state.stats.todayLikes+=useImpact.likes;}
+  if(useImpact.views){state.stats.views=Math.max(0,state.stats.views+useImpact.views);state.stats.todayViews+=useImpact.views;}
+  if(useImpact.works){state.stats.works+=useImpact.works;state.stats.todayWorks+=useImpact.works;generateWorks(useImpact.works);}
+  if(useImpact.exp){state.stats.exp=Math.max(0,state.stats.exp+useImpact.exp);}
+
+  // 同步其他数据（封禁期间只减不增）
+  if(useImpact.views){
+    state.stats.comments=Math.round(state.stats.views*0.02);
+    state.stats.shares=Math.round(state.stats.views*0.005);
+    state.stats.saves=Math.round(state.stats.views*0.008);
+  }
+
+  // ===== 封禁事件处理（仅非封禁期可触发） =====
+  if(!state.banned && ev.id==='account_banned'){
+    state.banned=true;
+    state.banDays=r(1,16);
+    state.banStartDay=state.day;
+    state.banStartTick=state.eventCounter;
+    state.nameBeforeBan=state.user.name;
+    state.avatarBeforeBan=state.user.avatar;
+    state.user.name='TA';
+    state.user.avatar='👤';
+    document.body.classList.add('account-banned');
+    document.getElementById('warningBanner').style.display='block';
+    updateBanCountdown();
+    document.getElementById('worksGrid').style.display='none';
+    document.getElementById('bannedWorks').style.display='flex';
+    showToast('🚫 账号被封禁！剩余 '+state.banDays+' 天','fan');
+  }
+
+  const eventRecord={
+    id:ev.id,type:ev.type,icon:ev.icon,title:ev.title,desc,
+    impact,time:Date.now(),day:state.day,
+    fansBefore,fansAfter:state.stats.fans,
+  };
+  state.events.unshift(eventRecord);
+  if(state.events.length>200)state.events.length=200;
+
+  // 生成作品（部分事件）
+  if(['viral_hit','daily_upload','collab_video','official_feature'].includes(ev.id)&&!impact.works){
+    generateWorks(1);
+    state.stats.works++;
+    state.stats.todayWorks++;
+  }
+
+  // 生成消息
+  generateMessageFromEvent(eventRecord);
+
+  // 检查成就
+  checkAchievements();
+
+  // 标记列表类UI需要刷新（由主循环在下一帧统一处理）
+  _dirty.events = true;
+  _dirty.messages = true;
+  if(impact.works) _dirty.works = true;
+  if(Math.random()<0.3) _dirty.collabs = true;
+
+  // 所有事件一律静默触发，不弹窗
+  // Toast提示
+  if(ev.id==='account_banned'){
+    showToast(`🚫 账号被封禁！${state.banDays}天后解封`, 'info');
+  } else if(state.banned){
+    // 封禁期：明确提示掉粉，绝不说"涨"
+    const drop = useImpact.fans || 0;
+    if(drop < 0){
+      showToast(`📉 封禁中掉粉 ${formatNum(Math.abs(drop))}`, 'info');
+    } else if(useImpact.views < 0){
+      showToast(`📉 封禁中播放量持续下降`, 'info');
+    }
+  } else if(ev.id==='mass_unfollow'){
+    showToast(`💔 大规模取关！粉丝 -${formatNum(Math.abs(impact.fans))}`, 'info');
+  } else if(impact.fans&&Math.abs(impact.fans)>100){
+    showToast(`${impact.fans>0?'🔥':'📉'} 粉丝${impact.fans>0?'+':''}${formatNum(impact.fans)}`,impact.fans>0?'fan':'info');
+  }
+}
+
+// ===================== 事件列表渲染 =====================
+function renderEventList(){
+  const container=document.getElementById('eventList');
+  container.innerHTML='';
+  const recent=state.events.slice(0,30);
+  recent.forEach(ev=>{
+    const item=document.createElement('div');
+    item.className='event-item';
+    const cls=ev.type==='positive'?'positive':ev.type==='negative'?'negative':ev.type==='legendary'?'legendary':'neutral';
+    const tagText={positive:'好事',negative:'坏事',neutral:'日常',legendary:'传奇'}[ev.type];
+    const impacts=ev.impact||{};
+    let impactHtml='';
+    const lbl={fans:'粉丝',likes:'点赞',views:'播放',works:'作品',exp:'经验'};
+    Object.entries(impacts).forEach(([k,v])=>{if(lbl[k]&&v)impactHtml+=`<span class="impact-chip ${v>0?'impact-up':'impact-down'}">${v>0?'+':''}${formatNum(v)} ${lbl[k]}</span>`;});
+    item.innerHTML=`
+      <div class="event-icon-wrap ${cls}">${ev.icon}</div>
+      <div class="event-body">
+        <div class="event-header">
+          <span class="event-type-tag tag-${ev.type==='positive'?'pos':ev.type==='negative'?'neg':ev.type==='legendary'?'leg':'neu'}">${tagText}</span>
+          <span style="font-size:13px;font-weight:600;">${ev.title}</span>
+          <span class="event-time">第${ev.day}天 ${formatTime(ev.time)}</span>
+        </div>
+        <div class="event-desc">${ev.desc}</div>
+        <div class="event-impact">${impactHtml}</div>
+      </div>`;
+    container.appendChild(item);
+  });
+  document.getElementById('eventCount').textContent=state.events.length+' 条事件';
+}
+
+// ===================== 作品系统 =====================
+function generateInitialWorks(n){
+  const nich=state.user.nicheData;
+  for(let i=0;i<n;i++)generateWorks(1);
+}
+function generateWorks(n){
+  const nich=state.user.nicheData;
+  const covers=['🎬','🎥','📹','🎞️','📽️','🎦','📺','📷','🖼️','🎨'];
+  for(let i=0;i<n;i++){
+    const topic=pick(nich.topics);
+    const titles=[
+      `我试了${topic}，结果...`,
+      `${topic}入门指南`,
+      `千万别这样${topic}`,
+      `${topic}翻车现场`,
+      `关于${topic}的真相`,
+      `${topic}挑战！`,
+      `我的${topic}日常`,
+      `${topic}你不知道的事`,
+      `10分钟学会${topic}`,
+      `${topic}红黑榜`,
+    ];
+    const w={
+      id:'W'+Date.now().toString(36)+r(100,999),
+      title:pick(titles),
+      cover:pick(covers),
+      duration:`${r(0,5)}:${r(10,59).toString().padStart(2,'0')}`,
+      views:r(100,5000)+state.stats.fans*r(1,5),
+      likes:0,
+      comments:0,
+      time:Date.now(),
+      day:state.day,
+    };
+    w.likes=Math.round(w.views*r(1,8)/100);
+    w.comments=Math.round(w.likes*r(5,20)/100);
+    state.works.unshift(w);
+  }
+  if(state.works.length>100)state.works.length=100;
+}
+
+function renderWorksPage(){
+  const grid=document.getElementById('worksGrid');
+  grid.innerHTML='';
+  const works=state.works.slice(0,30);
+  works.forEach(w=>{
+    const card=document.createElement('div');
+    card.className='work-card';
+    const bgColors=['#1a1a2e','#16213e','#0f3460','#1a1a3e','#2d1b69','#1b4332','#3d1c71','#0d3b66'];
+    const bg=pick(bgColors);
+    card.innerHTML=`
+      <div class="work-cover" style="background:linear-gradient(135deg,${bg},#0a0a14);">
+        <span style="font-size:42px;z-index:1;">${w.cover}</span>
+        <div class="cover-overlay"></div>
+      </div>
+      <div class="work-duration">⏱ ${w.duration}</div>
+      <div class="work-views-badge">👁 ${formatNum(w.views)}</div>
+      <div class="work-info">
+        <div class="work-title">${w.title}</div>
+        <div class="work-meta"><span>❤ ${formatNum(w.likes)}</span><span>💬 ${formatNum(w.comments)}</span><span>第${w.day}天</span></div>
+      </div>`;
+    grid.appendChild(card);
+  });
+  document.getElementById('workCount').textContent=state.stats.works+' 个作品';
+}
+
+// ===================== 消息系统 =====================
+function generateMessageFromEvent(ev){
+  const templates={
+    positive:[
+      {from:'系统通知',icon:'📢',preview:'恭喜！你的作品表现优异'},
+      {from:'粉丝团',icon:'💕',preview:'新成员加入了你的粉丝团'},
+      {from:'商务合作',icon:'💼',preview:'有品牌对你的账号感兴趣'},
+    ],
+    negative:[
+      {from:'系统通知',icon:'⚠️',preview:'检测到你的内容数据异常'},
+      {from:'用户举报',icon:'🚫',preview:'有用户举报了你的评论区'},
+    ],
+    neutral:[
+      {from:'系统通知',icon:'📋',preview:'本周创作者周报已生成'},
+      {from:'粉丝',icon:'💬',preview:'评论区有新问题等待回复'},
+    ],
+    legendary:[
+      {from:'平台官方',icon:'👑',preview:'重要通知：请查收站内信'},
+      {from:'认证消息',icon:'✅',preview:'你的账号获得了新认证'},
+    ],
+  };
+  const t=ev.type==='positive'||ev.type==='negative'||ev.type==='legendary'?ev.type:'neutral';
+  const tpl=pick(templates[t]||templates.neutral);
+  state.messages.unshift({
+    id:'M'+Date.now(),from:tpl.from,icon:tpl.icon,preview:tpl.preview+' - '+ev.title,
+    time:Date.now(),unread:true,day:state.day,
+  });
+  if(state.messages.length>50)state.messages.length=50;
+}
+
+function renderMessages(){
+  const list=document.getElementById('msgList');
+  list.innerHTML='';
+  state.messages.slice(0,30).forEach(m=>{
+    const item=document.createElement('div');
+    item.className='msg-item';
+    item.innerHTML=`
+      <div class="msg-avatar">${m.icon}</div>
+      <div class="msg-body">
+        <div class="msg-top"><span class="msg-name">${m.from}</span><span class="msg-time">第${m.day}天</span></div>
+        <div class="msg-preview">${m.preview}</div>
+      </div>
+      ${m.unread?'<div class="msg-badge"></div>':''}`;
+    item.onclick=()=>{m.unread=false;renderMessages();};
+    list.appendChild(item);
+  });
+  const unread=state.messages.filter(m=>m.unread).length;
+  document.getElementById('msgUnread').textContent=unread+' 条未读';
+}
+
+// ===================== 数据分析页 =====================
+function renderAnalytics(){
+  // 实时数据直接写值
+  const av=document.getElementById('anaViews');
+  if(av) av.innerHTML = formatNum(Math.round(state.stats.views)) + ' <span class="unit">次播放</span>';
+  const al=document.getElementById('anaLikes');
+  if(al) al.innerHTML = formatNum(Math.round(state.stats.likes)) + ' <span class="unit">点赞</span>';
+  const ac=document.getElementById('anaComments');
+  if(ac) ac.textContent = formatNum(state.stats.comments);
+  const ash=document.getElementById('anaShares');
+  if(ash) ash.textContent = formatNum(state.stats.shares);
+  const asv=document.getElementById('anaSaves');
+  if(asv) asv.textContent = formatNum(state.stats.saves);
+  // 趋势（只在每天变化时算）
+  const oldV=state.history.views[0]||1;
+  const trendV=oldV>0?Math.round((state.stats.views-oldV)/oldV*100):0;
+  const oldL=state.history.likes[0]||1;
+  const trendL=oldL>0?Math.round((state.stats.likes-oldL)/oldL*100):0;
+  const tv=document.getElementById('anaViewsTrend');
+  if(tv) tv.textContent=Math.abs(trendV)+'%';
+  const tl=document.getElementById('anaLikesTrend');
+  if(tl) tl.textContent=Math.abs(trendL)+'%';
+  // 折线图、画像、TOP3 只在切到该页或每天变化时更新
+  if(state.day !== _lastAnalyticsDay){
+    _lastAnalyticsDay = state.day;
+    drawTrendChart();
+    renderAudience();
+    renderTopWorks();
+  }
+}
+
+function drawTrendChart(){
+  const svg=document.getElementById('trendChart');
+  const data=state.history.views;
+  const w=300,h=120,pad=10;
+  const max=Math.max(...data,1);
+  const min=Math.min(...data,0);
+  const range=max-min||1;
+  const pts=data.map((v,i)=>{const x=(i/(data.length-1))*(w-pad*2)+pad;const y=h-pad-((v-min)/range)*(h-pad*2);return`${x},${y}`;}).join(' ');
+  const areaPts=`${pad},${h-pad} ${pts} ${w-pad},${h-pad}`;
+  const lastX=(w-pad*2)+pad, lastY=h-pad-((data[data.length-1]-min)/range)*(h-pad*2);
+  const gradId='g'+Date.now();
+  svg.innerHTML=`
+    <defs><linearGradient id="${gradId}" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#ff2c55" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ff2c55" stop-opacity="0"/>
+    </linearGradient></defs>
+    <polygon points="${areaPts}" fill="url(#${gradId})"/>
+    <polyline points="${pts}" fill="none" stroke="#ff2c55" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${lastX}" cy="${lastY}" r="4" fill="#ff2c55"/>
+    <circle cx="${lastX}" cy="${lastY}" r="8" fill="none" stroke="#ff2c55" stroke-opacity="0.3" stroke-width="2">
+      <animate attributeName="r" from="4" to="14" dur="1.5s" repeatCount="indefinite"/>
+      <animate attributeName="stroke-opacity" from="0.5" to="0" dur="1.5s" repeatCount="indefinite"/>
+    </circle>`;
+}
+
+function renderAudience(){
+  const container=document.getElementById('audienceBars');
+  container.innerHTML='';
+  const segs=[
+    {label:'18-24',pct:r(20,40),color:'#ff2c55'},
+    {label:'25-34',pct:r(15,35),color:'#3b82f6'},
+    {label:'35-44',pct:r(5,20),color:'#00d4aa'},
+    {label:'男',pct:r(40,65),color:'#a855f7'},
+    {label:'女',pct:r(35,60),color:'#ec4899'},
+  ];
+  segs.forEach(s=>{
+    const row=document.createElement('div');row.className='aud-row';
+    row.innerHTML=`<span class="aud-label">${s.label}</span><div class="aud-bar-track"><div class="aud-bar-fill" style="width:0%;background:${s.color};" data-w="${s.pct}"></div></div><span class="aud-pct">${s.pct}%</span>`;
+    container.appendChild(row);
+  });
+  // 动画
+  setTimeout(()=>container.querySelectorAll('.aud-bar-fill').forEach(b=>b.style.width=b.dataset.w+'%'),50);
+}
+
+function renderTopWorks(){
+  const container=document.getElementById('topWorks');
+  container.innerHTML='';
+  const top=state.works.slice().sort((a,b)=>b.views-a.views).slice(0,3);
+  top.forEach((w,i)=>{
+    const row=document.createElement('div');
+    row.style.cssText='display:flex;align-items:center;gap:12px;padding:10px;background:var(--dy-dark-3);border-radius:10px;';
+    row.innerHTML=`<div style="font-size:20px;">${i===0?'🥇':i===1?'🥈':'🥉'}</div><div style="flex:1;min-width:0;"><div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${w.title}</div><div style="font-size:11px;color:var(--dy-gray);">👁 ${formatNum(w.views)} · ❤ ${formatNum(w.likes)}</div></div>`;
+    container.appendChild(row);
+  });
+}
+
+// ===================== 合作页 =====================
+function checkCollabs(){
+  // 每N天随机生成合作
+  if(state.day%3===0&&state.stats.fans>50&&Math.random()<0.4){
+    const brands=['Nike','Adidas','小米','华为','Apple','Samsung','可口可乐','星巴克','完美日记','欧莱雅','比亚迪','蔚来','大疆','B站','网易云音乐','QQ音乐','Keep','瑞幸咖啡'];
+    const brand=pick(brands);
+    const icons=['👟','🎧','📱','💻','🍔','☕','💄','🚗','🎵','🎮'];
+    state.collabs.push({
+      id:'C'+Date.now(),brand,icon:pick(icons),
+      desc:`邀请你合作推广品牌内容，费用 ¥${r(1000,50000)}`,
+      status:'pending',time:Date.now(),day:state.day,
+    });
+  }
+  // 随机完成pending
+  state.collabs.filter(c=>c.status==='pending').forEach(c=>{
+    if(Math.random()<0.3)c.status='active';
+  });
+  // 随机结束active
+  state.collabs.filter(c=>c.status==='active').forEach(c=>{
+    if(Math.random()<0.2)c.status='ended';
+  });
+}
+
+function renderCollabs(){
+  const container=document.getElementById('collabList');
+  container.innerHTML='';
+  if(state.collabs.length===0){
+    container.innerHTML='<div style="text-align:center;padding:40px;color:var(--dy-gray);">暂无合作邀请<br><small>粉丝多了品牌自然会找上门</small></div>';
+    document.getElementById('collabCount').textContent='0 个合作';
+    return;
+  }
+  state.collabs.slice(0,10).forEach(c=>{
+    const card=document.createElement('div');
+    card.className='brand-card';
+    const statusMap={pending:['status-pending','待确认'],active:['status-active','合作中'],ended:['status-ended','已结束']};
+    const [sc,st]=statusMap[c.status]||statusMap.pending;
+    card.innerHTML=`
+      <div class="brand-logo">${c.icon}</div>
+      <div class="brand-info">
+        <div class="brand-name">${c.brand}</div>
+        <div class="brand-desc">${c.desc}</div>
+      </div>
+      <div class="brand-status ${sc}">${st}</div>`;
+    container.appendChild(card);
+  });
+  document.getElementById('collabCount').textContent=state.collabs.length+' 个合作';
+}
+
+// ===================== 成就系统 =====================
+function checkAchievements(){
+  ACHIEVEMENTS.forEach(a=>{
+    if(state.achievements.includes(a.id))return;
+    if(a.check(state.stats)){
+      state.achievements.push(a.id);
+      showAchievement(a);
+    }
+  });
+}
+
+function showAchievement(a){
+  const pop=document.createElement('div');
+  pop.className='achievement-pop';
+  pop.innerHTML=`<div class="ach-icon">${a.icon}</div><div class="ach-text"><div class="ach-title">🏆 成就解锁</div><div class="ach-name">${a.name}</div></div>`;
+  document.body.appendChild(pop);
+  setTimeout(()=>{pop.style.transition='opacity .5s';pop.style.opacity='0';setTimeout(()=>pop.remove(),500);},4000);
+}
+
+// ===================== Toast =====================
+function showToast(text,type='info'){
+  const c=document.getElementById('toastContainer');
+  const t=document.createElement('div');
+  t.className='toast '+type;
+  t.textContent=text;
+  c.appendChild(t);
+  setTimeout(()=>t.remove(),3000);
+}
+
+// ===================== 页面切换 =====================
+function switchPage(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelectorAll('.sidebar-item').forEach(s=>s.classList.remove('active'));
+  const sb=document.querySelector(`.sidebar-item[data-page="${page}"]`);
+  if(sb)sb.classList.add('active');
+  document.querySelectorAll('.tabbar-item').forEach(t=>t.classList.remove('active'));
+  const tb=document.querySelector(`.tabbar-item[data-page="${page}"]`);
+  if(tb)tb.classList.add('active');
+  // 刷新对应页
+  if(page==='timeline'){renderAnalytics();renderCollabs();}
+  if(page==='events'){renderDataCards();renderEventList();}
+  if(page==='messages')renderMessages();
+  if(page==='me'){renderWorksPage();renderTopBar();}
+}
+
+document.querySelectorAll('.sidebar-item').forEach(item=>{
+  item.onclick=()=>switchPage(item.dataset.page);
+});
+document.querySelectorAll('.tabbar-item').forEach(item=>{
+  item.onclick=()=>switchPage(item.dataset.page);
+});
+
+// ===================== 设置页交互 =====================
+document.getElementById('btnSpeed').onclick=()=>{
+  state.speedIndex=(state.speedIndex+1)%3;
+  document.getElementById('setSpeed').textContent=state.speedLabels[state.speedIndex];
+  showToast('⚡ 速度：'+state.speedLabels[state.speedIndex],'info');
+};
+document.getElementById('btnTogglePause').onclick=()=>{
+  state.paused=!state.paused;
+  document.getElementById('pauseToggle').classList.toggle('on',state.paused);
+  showToast(state.paused?'⏸️ 已暂停':'▶️ 已继续','info');
+};
+document.getElementById('btnReset').onclick=()=>{
+  if(confirm('确定要重置账号吗？所有数据将清空！')){
+    localStorage.removeItem('dy_sim_save');
+    location.reload();
+  }
+};
+
+// ===================== 自动模拟引擎（实时 rAF 驱动） =====================
+let _rafId = null;
+let _lastFrameTime = 0;
+let _eventAccumulator = 0; // 累积时间，到阈值就触发事件
+let _dayAccumulator = 0;   // 累积时间，到阈值就推进一天
+let _saveAccumulator = 0;
+let _collabCheckedToday = false;
+const DAY_LENGTH_MS = 24000; // 每24秒=游戏里的一天（实时感）
+
+function startSimulation(){
+  // 历史数据初始化
+  for(let i=0;i<7;i++){state.history.fans[i]=state.stats.fans;state.history.likes[i]=state.stats.likes;state.history.views[i]=state.stats.views;state.history.works[i]=state.stats.works;}
+
+  _lastFrameTime = performance.now();
+
+  function frame(now){
+    const deltaMs = now - _lastFrameTime;
+    _lastFrameTime = now;
+    const deltaSec = deltaMs / 1000;
+
+    if(!state.paused){
+      // === 事件触发（按速度倍率累积） ===
+      // 封禁期间：仍然触发事件，但只走"掉数据"的封禁专用事件池
+      // 绝不会再触发 account_banned（已在 pickBannedEvent 中排除）
+      const speedMs = state.speeds[state.speedIndex];
+      const eventIntervalSec = speedMs / 1000;
+      _eventAccumulator += deltaSec;
+      if(_eventAccumulator >= eventIntervalSec){
+        _eventAccumulator = 0;
+        triggerEvent();
+      }
+
+      // === 天数推进 ===
+      _dayAccumulator += deltaMs;
+      if(_dayAccumulator >= DAY_LENGTH_MS){
+        _dayAccumulator -= DAY_LENGTH_MS;
+        state.day++;
+        state.stats.todayFans=0;state.stats.todayLikes=0;state.stats.todayViews=0;state.stats.todayWorks=0;
+        // 历史滚动
+        state.history.fans.push(state.stats.fans);state.history.fans.shift();
+        state.history.likes.push(state.stats.likes);state.history.likes.shift();
+        state.history.views.push(state.stats.views);state.history.views.shift();
+        state.history.works.push(state.stats.works);state.history.works.shift();
+        checkCollabs();
+        // 只在不频繁时提示
+        if(state.day%5===0) showToast('📅 第 '+state.day+' 天','gold');
+      }
+
+      // === 封禁倒计时（每帧实时刷新） ===
+      if(state.banned){
+        updateBanCountdown();
+        const daysPassed = state.day - state.banStartDay;
+        if(daysPassed >= state.banDays){
+          // ===== 解封！一次性恢复所有状态 =====
+          state.banned=false;
+          state.user.name=state.nameBeforeBan||state.user.name;
+          state.user.avatar=state.avatarBeforeBan||state.user.avatar;
+          document.body.classList.remove('account-banned');
+          document.getElementById('warningBanner').style.display='none';
+          document.getElementById('worksGrid').style.display='';
+          document.getElementById('bannedWorks').style.display='none';
+          showToast('✅ 账号已解封！头像和名字已恢复，数据重新开始增长','green');
+          // 解封后立刻给一次"反弹恢复"事件，让数据重新涨起来
+          setTimeout(()=>{
+            if(!state.banned && !state.paused){
+              const reboundFans = Math.max(10, Math.round(state.stats.fans * 0.05));
+              const reboundLikes = Math.max(5, Math.round(state.stats.likes * 0.03));
+              state.stats.fans += reboundFans;
+              state.stats.likes += reboundLikes;
+              state.stats.todayFans += reboundFans;
+              state.stats.todayLikes += reboundLikes;
+              showToast('🎉 解封反弹！粉丝回流 +'+formatNum(reboundFans),'gold');
+              _dirty.events = true;
+            }
+          }, 800);
+        }
+      }
+
+      // === 自然增长 / 封禁流失（每帧微增/微减，丝滑实时） ===
+      // deltaSec 是真实秒数，乘以速率系数
+      let rateFans, rateLikes, rateViews;
+      if(state.banned){
+        // 封禁期间：持续流失，且流失速度随时间加快（恐慌效应）
+        const panicFactor = 1 + (state.day - state.banStartDay) * 0.15; // 封禁越久掉越快
+        rateFans = -(state.stats.fans * 0.0005) * panicFactor - 0.1;  // 每帧持续掉
+        rateLikes = -(state.stats.likes * 0.0002) * panicFactor;
+        rateViews = -(state.stats.views * 0.00008) * panicFactor;
+        // 额外随机骤降：每帧小概率触发"大批取关"
+        if(Math.random() < 0.0003 * deltaSec * 60){
+          const drop = Math.max(1, Math.round(state.stats.fans * (0.005 + Math.random() * 0.02)));
+          state.stats.fans = Math.max(0, state.stats.fans - drop);
+          state.stats.todayFans -= drop;
+        }
+      } else {
+        // 正常：基数越大增长越快
+        rateFans = state.stats.fans * 0.00015 + 0.02;
+        rateLikes = state.stats.likes * 0.0002 + 0.05;
+        rateViews = state.stats.views * 0.0003 + 0.1;
+      }
+      const dFans = rateFans * deltaSec;
+      const dLikes = rateLikes * deltaSec;
+      const dViews = rateViews * deltaSec;
+      state.stats.fans = Math.max(0, state.stats.fans + dFans);
+      state.stats.likes = Math.max(0, state.stats.likes + dLikes);
+      state.stats.views = Math.max(0, state.stats.views + dViews);
+      state.stats.todayFans += dFans;
+      state.stats.todayLikes += dLikes;
+      state.stats.todayViews += dViews;
+      // 关联数据
+      state.stats.comments = Math.round(state.stats.views * 0.02);
+      state.stats.shares = Math.round(state.stats.views * 0.005);
+      state.stats.saves = Math.round(state.stats.views * 0.008);
+
+      // === 每帧刷新UI ===
+      renderTopBar();
+      renderDataCards();
+      // 更新经验条（每帧）
+      const lvl = state.stats.level;
+      const expNeeded = expForLevel(lvl+1) - expForLevel(lvl);
+      const expInLevel = state.stats.exp - expForLevel(lvl);
+      const pct = Math.min(100, Math.round(expInLevel/expNeeded*100));
+      const expFill = document.getElementById('expFill');
+      if(expFill) expFill.style.width = pct + '%';
+      const expText = document.getElementById('expText');
+      if(expText) expText.textContent = Math.round(state.stats.exp) + ' / ' + expForLevel(lvl+1);
+      // 封禁倒计时每帧更新
+      if(state.banned) updateBanCountdown();
+
+      // === 消费脏标记（列表类，不需要每帧重绘） ===
+      if(_dirty.events){ _dirty.events=false; renderEventList(); }
+      if(_dirty.messages){ _dirty.messages=false; renderMessages(); }
+      if(_dirty.works){ _dirty.works=false; renderWorksPage(); }
+      if(_dirty.collabs){ _dirty.collabs=false; renderCollabs(); }
+
+      // === 存档（每10秒） ===
+      _saveAccumulator += deltaSec;
+      if(_saveAccumulator >= 10){ _saveAccumulator = 0; saveGame(); }
+    }
+
+    _rafId = requestAnimationFrame(frame);
+  }
+  _rafId = requestAnimationFrame(frame);
+
+  // 初始渲染
+  renderTopBar();renderDataCards();renderEventList();renderMessages();renderAnalytics();renderWorksPage();renderCollabs();
+}
+
+// ===================== 存档 =====================
+function saveGame(){
+  const data={
+    user:state.user,stats:state.stats,events:state.events.slice(0,50),
+    works:state.works.slice(0,30),messages:state.messages.slice(0,20),
+    collabs:state.collabs,achievements:state.achievements,day:state.day,
+    usedEventIds:Array.from(state.usedEventIds),eventCounter:state.eventCounter,
+    speedIndex:state.speedIndex,paused:state.paused,
+    history:state.history,
+    banned:state.banned||false,
+    banDays:state.banDays||0,
+    banStartDay:state.banStartDay||0,
+    banStartTick:state.banStartTick||0,
+    mutualRatio:state.mutualRatio||0.7,
+    nameBeforeBan:state.nameBeforeBan||'',
+    avatarBeforeBan:state.avatarBeforeBan||'',
+    banStartTick:state.banStartTick||0,
+  };
+  try{localStorage.setItem('dy_sim_save',JSON.stringify(data));}catch(e){}
+}
+function loadGame(){
+  try{
+    const raw=localStorage.getItem('dy_sim_save');
+    if(!raw)return false;
+    const d=JSON.parse(raw);
+    Object.assign(state,d);
+    state.usedEventIds=new Set(d.usedEventIds||[]);
+    if(!state.mutualRatio)state.mutualRatio=r(60,90)/100;
+    if(state.banned){
+      document.body.classList.add('account-banned');
+      document.getElementById('warningBanner').style.display='block';
+      document.getElementById('worksGrid').style.display='none';
+      document.getElementById('bannedWorks').style.display='block';
+      updateBanCountdown();
+    }
+    // 同步动画缓存，避免从存档恢复时数字从0狂飙
+    _lastRendered.fans=d.stats.fans;
+    _lastRendered.follow=d.stats.follow;
+    _lastRendered.likes=d.stats.likes;
+    _lastRendered.views=d.stats.views;
+    _lastRendered.works=d.stats.works;
+    _lastRendered.exp=d.stats.exp;
+    _lastRendered.comments=Math.round(d.stats.views*0.02);
+    _lastRendered.shares=Math.round(d.stats.views*0.005);
+    _lastRendered.saves=Math.round(d.stats.views*0.008);
+    _lastRendered.mutual=Math.round(d.stats.follow*(state.mutualRatio||0.7));
+    return true;
+  }catch(e){return false;}
+}
+
+// ===================== 启动 =====================
+window.addEventListener('DOMContentLoaded',()=>{
+  initRegister();
+  // 尝试加载存档
+  if(loadGame()&&state.user.name){
+    // 跳过注册
+    regAvatar=state.user.avatar;regName=state.user.name;regNiche=state.user.niche;
+    document.getElementById('registerOverlay').classList.add('hidden');
+    document.getElementById('appContainer').classList.remove('hidden');
+    renderUserInfo();
+    document.getElementById('setSpeed').textContent=state.speedLabels[state.speedIndex]||'正常 (3s)';
+    document.getElementById('pauseToggle').classList.toggle('on',state.paused);
+    startSimulation();
+  }
+});
+</script>
+</body>
+</html>
