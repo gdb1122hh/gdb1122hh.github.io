@@ -1,7 +1,0 @@
-{
-  "name": "星空岛",
-  "icons": [
-    { "src": "./favicon.png", "type": "image/png", "sizes": "192x192" },
-    { "src": "./favicon.ico", "type": "image/x-icon", "sizes": "64x64 32x32 16x16" }
-  ]
-}
