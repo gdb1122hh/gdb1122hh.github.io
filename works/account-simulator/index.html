@@ -39,14 +39,7 @@ html, body {
 ::-webkit-scrollbar-thumb { background: var(--dy-gray-2); border-radius: 2px; }
 
 /* ========== 账号封禁状态 ========== */
-.account-banned .top-avatar,
-.account-banned .profile-avatar {
-  filter: grayscale(1) opacity(0.4);
-}
-.account-banned .top-name,
-.account-banned .profile-name {
-  color: var(--dy-subtext) !important;
-}
+/* 封禁期间头像和名字保持原样，不做任何视觉修改 */
 @keyframes numberDrop {
   0% { transform: translateY(-2px); opacity: 0.5; }
   100% { transform: translateY(0); opacity: 1; }
@@ -572,13 +565,7 @@ html, body {
   0%, 100% { opacity: 1; transform: scale(1); }
   50% { opacity: 0.5; transform: scale(0.95); }
 }
-/* 封禁时头像变灰 */
-.account-banned .profile-avatar {
-  filter: grayscale(1) opacity(0.4);
-}
-.account-banned .profile-name {
-  color: var(--dy-subtext) !important;
-}
+/* 封禁时头像和名字保持原样 */
 /* 经验条区域 */
 .exp-section {
   padding: 0 16px 16px;
@@ -1371,10 +1358,8 @@ function renderTopBar(){
   const expFill=document.getElementById('expFill');
   if(expFill) expFill.style.width=pct+'%';
 
-  // 封禁时刷新用户信息显示
+  // 封禁时只刷新倒计时，头像和名字完全不动
   if(state.banned){
-    document.getElementById('profileAvatar').textContent='👤';
-    document.getElementById('profileName').textContent='TA';
     updateBanCountdown();
   } else {
     document.getElementById('profileAvatar').textContent=state.user.avatar;
@@ -1571,10 +1556,7 @@ function triggerEvent(){
     state.banDays=r(1,16);
     state.banStartDay=state.day;
     state.banStartTick=state.eventCounter;
-    state.nameBeforeBan=state.user.name;
-    state.avatarBeforeBan=state.user.avatar;
-    state.user.name='TA';
-    state.user.avatar='👤';
+    // 不修改头像和名字，保留原样
     document.body.classList.add('account-banned');
     document.getElementById('warningBanner').style.display='block';
     updateBanCountdown();
@@ -2033,15 +2015,13 @@ function startSimulation(){
         updateBanCountdown();
         const daysPassed = state.day - state.banStartDay;
         if(daysPassed >= state.banDays){
-          // ===== 解封！一次性恢复所有状态 =====
+          // ===== 解封！头像和名字从未改动，无需恢复 =====
           state.banned=false;
-          state.user.name=state.nameBeforeBan||state.user.name;
-          state.user.avatar=state.avatarBeforeBan||state.user.avatar;
           document.body.classList.remove('account-banned');
           document.getElementById('warningBanner').style.display='none';
           document.getElementById('worksGrid').style.display='';
           document.getElementById('bannedWorks').style.display='none';
-          showToast('✅ 账号已解封！头像和名字已恢复，数据重新开始增长','green');
+          showToast('✅ 账号已解封！数据重新开始增长','green');
           // 解封后立刻给一次"反弹恢复"事件，让数据重新涨起来
           setTimeout(()=>{
             if(!state.banned && !state.paused){
@@ -2161,6 +2141,7 @@ function loadGame(){
       document.getElementById('worksGrid').style.display='none';
       document.getElementById('bannedWorks').style.display='block';
       updateBanCountdown();
+      // 头像和名字保持原样，不做任何修改
     }
     // 同步动画缓存，避免从存档恢复时数字从0狂飙
     _lastRendered.fans=d.stats.fans;
