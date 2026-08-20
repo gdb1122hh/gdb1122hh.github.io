@@ -3,152 +3,59 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>WANTED No.01 - 炸这喝</title>
+<title>WANTED No.1 - 炸这喝</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 html,body { background:#0a0a0f; font-family:"SimHei","Microsoft YaHei",sans-serif; overflow-x:hidden; }
 body { min-height:100vh; }
-
-/* 导航栏 */
-.nav-bar {
-  position:fixed; top:0; left:0; right:0; z-index:1000;
-  background:linear-gradient(180deg,#1a0000 0%,#0d0000 100%);
-  border-bottom:2px solid #c41e3a;
-  display:flex; align-items:center; justify-content:space-between;
-  padding:10px 20px; height:56px;
-}
-.nav-btn {
-  background:#c41e3a; color:#fff; border:none; padding:8px 18px;
-  font-size:15px; font-weight:bold; cursor:pointer; border-radius:4px;
-  font-family:inherit; letter-spacing:1px;
-}
+.nav-bar { position:fixed; top:0; left:0; right:0; z-index:1000; background:linear-gradient(180deg,#1a0000 0%,#0d0000 100%); border-bottom:2px solid #c41e3a; display:flex; align-items:center; justify-content:space-between; padding:10px 20px; height:56px; }
+.nav-btn { background:#c41e3a; color:#fff; border:none; padding:8px 18px; font-size:15px; font-weight:bold; cursor:pointer; border-radius:4px; font-family:inherit; letter-spacing:1px; }
 .nav-btn:hover:not(:disabled) { background:#e03050; }
 .nav-btn:disabled { background:#333; color:#666; cursor:not-allowed; }
-
-.nav-btn-home { background:#333; margin-left:8px; }
+.nav-btn-home { background:#333; font-size:14px; padding:8px 14px; text-decoration:none; display:inline-flex; align-items:center; }
 .nav-btn-home:hover { background:#555; }
 
 .nav-title { color:#c41e3a; font-size:18px; font-weight:900; letter-spacing:3px; }
 .nav-numbers { display:flex; gap:4px; }
-.nav-num {
-  width:32px; height:32px; display:flex; align-items:center; justify-content:center;
-  border:1px solid #444; color:#888; font-size:13px; font-weight:bold;
-  cursor:pointer; background:#1a1a1a; border-radius:3px;
-  font-family:inherit;
-}
+.nav-num { width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:1px solid #444; color:#888; font-size:13px; font-weight:bold; cursor:pointer; background:#1a1a1a; border-radius:3px; font-family:inherit; }
 .nav-num:hover { border-color:#c41e3a; color:#fff; }
 .nav-num.active { background:#c41e3a; color:#fff; border-color:#c41e3a; }
-
-/* 通缉令主体 */
-.wanted-container {
-  max-width:680px; margin:80px auto 40px;
-  background:#f5f0e8; border:6px solid #111;
-  box-shadow:0 0 40px rgba(196,30,58,0.3);
-  position:relative;
-}
-.wanted-header {
-  background:#c41e3a; color:#fff; text-align:center;
-  padding:18px 20px 14px;
-}
-.wanted-header h1 {
-  font-size:52px; font-weight:900; letter-spacing:8px;
-  text-shadow:2px 2px 0 #000;
-}
-.wanted-header .subtitle {
-  font-size:14px; letter-spacing:4px; margin-top:4px; opacity:0.9;
-}
+.wanted-container { max-width:680px; margin:80px auto 40px; background:#f5f0e8; border:6px solid #111; box-shadow:0 0 40px rgba(196,30,58,0.3); position:relative; }
+.wanted-header { background:#c41e3a; color:#fff; text-align:center; padding:18px 20px 14px; }
+.wanted-header h1 { font-size:52px; font-weight:900; letter-spacing:8px; text-shadow:2px 2px 0 #000; }
+.wanted-header .subtitle { font-size:14px; letter-spacing:4px; margin-top:4px; opacity:0.9; }
 .wanted-body { padding:28px 32px; }
-.wanted-row {
-  display:flex; margin:14px 0; font-size:17px; line-height:1.8;
-}
+.wanted-row { display:flex; margin:14px 0; font-size:17px; line-height:1.8; }
 .wanted-label { width:130px; font-weight:900; color:#333; flex-shrink:0; }
 .wanted-value { color:#111; flex:1; }
-.wanted-name {
-  text-align:center; font-size:42px; font-weight:900;
-  color:#c41e3a; letter-spacing:6px; margin:18px 0 6px;
-  border-bottom:3px double #333; padding-bottom:14px;
-}
-.wanted-photo {
-  width:200px; height:240px; margin:16px auto;
-  border:4px solid #111; background:#222;
-  display:flex; align-items:center; justify-content:center;
-  position:relative; overflow:hidden;
-}
-.wanted-photo .photo-placeholder {
-  font-size:80px; filter:grayscale(1);
-}
-.wanted-photo .photo-label {
-  position:absolute; bottom:0; left:0; right:0;
-  background:rgba(0,0,0,0.8); color:#fff; text-align:center;
-  font-size:12px; padding:4px; letter-spacing:2px;
-}
-.crime-block {
-  margin:22px 0; padding:20px;
-  background:#fff8f0; border-left:5px solid #c41e3a;
-  font-size:16px; line-height:2; color:#222;
-}
-.crime-block .crime-title {
-  font-weight:900; color:#c41e3a; font-size:18px; margin-bottom:8px;
-}
-.reward-box {
-  text-align:center; margin:28px 0 10px;
-}
-.reward-box .reward-label {
-  font-size:14px; color:#666; letter-spacing:2px;
-}
-.reward-box .reward-amount {
-  font-size:32px; color:#c41e3a; font-weight:900; margin:6px 0;
-}
-.reward-box .reward-desc {
-  font-size:15px; color:#444;
-}
-.wanted-footer {
-  text-align:right; padding:0 32px 24px;
-  font-size:14px; color:#555; font-style:italic;
-}
-.wanted-seal {
-  position:absolute; top:20px; right:24px;
-  width:90px; height:90px; border:4px solid #c41e3a;
-  border-radius:50%; display:flex; align-items:center; justify-content:center;
-  color:#c41e3a; font-weight:900; font-size:13px; letter-spacing:1px;
-  transform:rotate(-15deg); opacity:0.8;
-  border-style:dashed;
-}
+.wanted-name { text-align:center; font-size:42px; font-weight:900; color:#c41e3a; letter-spacing:6px; margin:18px 0 6px; border-bottom:3px double #333; padding-bottom:14px; }
+.wanted-photo { width:200px; height:240px; margin:16px auto; border:4px solid #111; background:#222; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; }
+.wanted-photo .photo-placeholder { font-size:80px; filter:grayscale(1); }
+.wanted-photo .photo-label { position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.8); color:#fff; text-align:center; font-size:12px; padding:4px; letter-spacing:2px; }
+.crime-block { margin:22px 0; padding:20px; background:#fff8f0; border-left:5px solid #c41e3a; font-size:16px; line-height:2; color:#222; }
+.crime-block .crime-title { font-weight:900; color:#c41e3a; font-size:18px; margin-bottom:8px; }
+.reward-box { text-align:center; margin:28px 0 10px; }
+.reward-box .reward-label { font-size:14px; color:#666; letter-spacing:2px; }
+.reward-box .reward-amount { font-size:32px; color:#c41e3a; font-weight:900; margin:6px 0; }
+.reward-box .reward-desc { font-size:15px; color:#444; }
+.wanted-footer { text-align:right; padding:0 32px 24px; font-size:14px; color:#555; font-style:italic; }
+.wanted-seal { position:absolute; top:20px; right:24px; width:90px; height:90px; border:4px solid #c41e3a; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#c41e3a; font-weight:900; font-size:13px; letter-spacing:1px; transform:rotate(-15deg); opacity:0.8; border-style:dashed; }
 .wanted-seal span { text-align:center; line-height:1.3; }
-
-/* 底部声明 */
-.disclaimer {
-  text-align:center; font-size:12px; color:#555;
-  padding:16px 20px 28px; letter-spacing:1px;
-  border-top:1px solid #333; margin-top:20px;
-  background:#0d0d12;
-}
+.disclaimer { text-align:center; font-size:12px; color:#888; padding:16px 20px 28px; letter-spacing:1px; border-top:1px solid #333; margin-top:20px; background:#0d0d12; }
 .disclaimer p { margin:4px 0; }
-
-/* 弹幕 */
-.danmu-layer {
-  position:fixed; top:56px; left:0; right:0; bottom:0;
-  pointer-events:none; overflow:hidden; z-index:500;
-}
-.danmu {
-  position:absolute; white-space:nowrap;
-  font-size:15px; font-weight:bold;
-  text-shadow:1px 1px 3px #000, -1px -1px 2px #000;
-  animation:none; will-change:transform;
-}
+.danmu-layer { position:fixed; top:56px; left:0; right:0; bottom:0; pointer-events:none; overflow:hidden; z-index:500; }
+.danmu { position:absolute; white-space:nowrap; font-size:15px; font-weight:bold; text-shadow:1px 1px 3px #000,-1px -1px 2px #000; will-change:transform; }
 </style>
 </head>
 <body>
 <div class="nav-bar">
-  <button class="nav-btn" id="prevBtn" disabled>◀ 上一个</button>
+  <button class="nav-btn" id="prevBtn" onclick="goPrev()">◀ 上一个</button>
   <div class="nav-title">WANTED</div>
   <div class="nav-numbers" id="navNumbers"></div>
-  <button class="nav-btn" id="nextBtn" onclick="goNext()">下一个 ▶</button>
-  <button class="nav-btn nav-btn-home" onclick="location.href=\'../index.html\'">🏠 返回首页</button>
+  <button class="nav-btn" id="nextBtn"  onclick="goNext()">下一个 ▶</button>
+  <a class="nav-btn nav-btn-home" href="../index.html">🏠 返回首页</a>
 </div>
-
 <div class="danmu-layer" id="danmuLayer"></div>
-
 <div class="wanted-container">
   <div class="wanted-seal"><span>CONFIDENTIAL<br>★★★★★</span></div>
   <div class="wanted-header">
@@ -189,10 +96,11 @@ body { min-height:100vh; }
       <div class="wanted-label">抓捕建议：</div>
       <div class="wanted-value">禁止提供任何食物，禁止携带任何爆炸物靠近，建议远程劝降</div>
     </div>
+    
     <div class="reward-box">
       <div class="reward-label">悬赏金额</div>
       <div class="reward-amount">∞ 星际信用点</div>
-      <div class="reward-desc">+ 高阶宇宙管理权限 + 一颗完好的行星</div>
+      <div class="reward-desc">+ 多元宇宙重建委员会终身主席 + 一颗完好的行星</div>
     </div>
     <div class="wanted-footer">
       星际联邦安全总局 签发<br>
@@ -204,87 +112,19 @@ body { min-height:100vh; }
     <p>本页面是娱乐内容，没有不良引导</p>
   </div>
 </div>
-
 <script>
-// 导航逻辑
-const TOTAL = 10;
-const CURRENT = 1;
+const TOTAL=10; const CURRENT=1;
 function goPrev(){ if(CURRENT>1) location.href='wanted_'+(CURRENT-1)+'.html'; }
 function goNext(){ if(CURRENT<TOTAL) location.href='wanted_'+(CURRENT+1)+'.html'; }
 function goTo(n){ if(n>=1&&n<=TOTAL) location.href='wanted_'+n+'.html'; }
-
-// 渲染数字导航
 const navContainer=document.getElementById('navNumbers');
-for(let i=1;i<=TOTAL;i++){
-  const d=document.createElement('div');
-  d.className='nav-num'+(i===CURRENT?' active':'');
-  d.textContent=i;
-  d.onclick=()=>goTo(i);
-  navContainer.appendChild(d);
-}
+for(let i=1;i<=TOTAL;i++){const d=document.createElement('div');d.className='nav-num'+(i===CURRENT?' active':'');d.textContent=i;d.onclick=()=>goTo(i);navContainer.appendChild(d);}
 document.getElementById('prevBtn').disabled=CURRENT<=1;
 document.getElementById('nextBtn').disabled=CURRENT>=TOTAL;
-
-// 弹幕评论
-const comments=[
-  "吃手雷？？这哥们是真勇啊",
-  "地球做错了什么要被这么对待",
-  "听说他下一站是太阳",
-  "地幔：我招谁惹谁了",
-  "这个通缉令我给满分💯",
-  "求问手雷什么口味",
-  "地壳板块：再见👋",
-  "星际联邦也管不了这种人",
-  "0.7秒自转改变？？细思极恐",
-  "仙女座表示拒绝入境",
-  "这剧情比科幻片还离谱",
-  "所以地球现在啥样了",
-  "嫌疑人照片太草了哈哈哈",
-  "手雷当零食，核弹当主食",
-  "建议通缉令升级为全宇宙公告",
-  "我赌他下一步吃黑洞",
-  "地幔爆炸这个罪名太硬核了",
-  "吃完还擦嘴，绅士行为",
-  "这个人的胃是什么材质做的",
-  "星际保险公司已破产"
-];
+const comments=["吃手雷？？这哥们是真勇啊", "地球做错了什么要被这么对待", "听说他下一站是太阳", "地幔：我招谁惹谁了", "这个通缉令我给满分", "求问手雷什么口味", "地壳板块：再见", "星际联邦也管不了这种人", "0.7秒自转改变？？细思极恐", "仙女座表示拒绝入境", "手雷当零食核弹当主食", "地幔爆炸罪名太硬核了", "吃完还擦嘴绅士行为", "这个人的胃什么材质做的", "星际保险公司已破产", "嫌疑人照片太草了哈哈哈", "建议通缉令升级全宇宙公告", "剧情比科幻片还离谱", "本宇宙做错了什么", "联邦局已经放弃治疗了"];
 const colors=['#ff6b6b','#ffd93d','#6bcb77','#4d96ff','#ff6bff','#ff9f43','#00d2d3','#f368e0','#ff6348','#7bed9f'];
-const layer=document.getElementById('danmuLayer');
-let danmuCount=0;
-const MAX_DANMU=15;
-
-function spawnDanmu(){
-  if(danmuCount>=MAX_DANMU) return;
-  const text=comments[Math.floor(Math.random()*comments.length)];
-  const div=document.createElement('div');
-  div.className='danmu';
-  div.textContent=text;
-  div.style.color=colors[Math.floor(Math.random()*colors.length)];
-  const layerH=layer.clientHeight||window.innerHeight-56;
-  const top=Math.random()*(layerH*0.85);
-  div.style.top=top+'px';
-  const startX=window.innerWidth+50;
-  div.style.transform='translate3d('+startX+'px,0,0)';
-  div.style.fontSize=(13+Math.random()*6)+'px';
-  layer.appendChild(div);
-  danmuCount++;
-
-  const duration=12000+Math.random()*8000;
-  const startTime=performance.now();
-  function animate(now){
-    const elapsed=now-startTime;
-    const progress=elapsed/duration;
-    const x=startX-progress*(startX+300);
-    div.style.transform='translate3d('+x+'px,0,0)';
-    if(progress<1){
-      requestAnimationFrame(animate);
-    }else{
-      div.remove();
-      danmuCount--;
-    }
-  }
-  requestAnimationFrame(animate);
-}
+const layer=document.getElementById('danmuLayer');let danmuCount=0;const MAX_DANMU=15;
+function spawnDanmu(){if(danmuCount>=MAX_DANMU)return;const text=comments[Math.floor(Math.random()*comments.length)];const div=document.createElement('div');div.className='danmu';div.textContent=text;div.style.color=colors[Math.floor(Math.random()*colors.length)];const layerH=layer.clientHeight||window.innerHeight-56;div.style.top=Math.random()*(layerH*0.85)+'px';const startX=window.innerWidth+50;div.style.transform='translate3d('+startX+'px,0,0)';div.style.fontSize=(13+Math.random()*6)+'px';layer.appendChild(div);danmuCount++;const duration=12000+Math.random()*8000;const startTime=performance.now();function animate(now){const p=(now-startTime)/duration;const x=startX-p*(startX+300);div.style.transform='translate3d('+x+'px,0,0)';if(p<1)requestAnimationFrame(animate);else{div.remove();danmuCount--;}}requestAnimationFrame(animate);}
 setInterval(spawnDanmu,600);
 </script>
 </body>
